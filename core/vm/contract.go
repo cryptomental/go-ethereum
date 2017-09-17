@@ -1,20 +1,6 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
 package vm
+
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"math/big"
@@ -37,7 +23,10 @@ type ContractRef interface {
 type AccountRef common.Address
 
 // Address casts AccountRef to a Address
-func (ar AccountRef) Address() common.Address { return (common.Address)(ar) }
+func (ar AccountRef) Address() common.Address {
+	fuzz_helper.CoverTab[22588]++
+	return (common.Address)(ar)
+}
 
 // Contract represents an ethereum contract in the state database. It contains
 // the the contract code, calling arguments. Contract implements ContractRef
@@ -66,19 +55,21 @@ type Contract struct {
 
 // NewContract returns a new contract environment for the execution of EVM.
 func NewContract(caller ContractRef, object ContractRef, value *big.Int, gas uint64) *Contract {
+	fuzz_helper.CoverTab[44810]++
 	c := &Contract{CallerAddress: caller.Address(), caller: caller, self: object, Args: nil}
 
 	if parent, ok := caller.(*Contract); ok {
-		// Reuse JUMPDEST analysis from parent context if available.
+		fuzz_helper.CoverTab[17878]++
+
 		c.jumpdests = parent.jumpdests
 	} else {
+		fuzz_helper.CoverTab[45021]++
 		c.jumpdests = make(destinations)
 	}
+	fuzz_helper.CoverTab[5262]++
 
-	// Gas should be a pointer so it can safely be reduced through the run
-	// This pointer will be off the state transition
 	c.Gas = gas
-	// ensures a value is set
+
 	c.value = value
 
 	return c
@@ -87,9 +78,9 @@ func NewContract(caller ContractRef, object ContractRef, value *big.Int, gas uin
 // AsDelegate sets the contract to be a delegate call and returns the current
 // contract (for chaining calls)
 func (c *Contract) AsDelegate() *Contract {
+	fuzz_helper.CoverTab[39040]++
 	c.DelegateCall = true
-	// NOTE: caller must, at all times be a contract. It should never happen
-	// that caller is something other than a Contract.
+
 	parent := c.caller.(*Contract)
 	c.CallerAddress = parent.CallerAddress
 	c.value = parent.value
@@ -99,14 +90,20 @@ func (c *Contract) AsDelegate() *Contract {
 
 // GetOp returns the n'th element in the contract's byte array
 func (c *Contract) GetOp(n uint64) OpCode {
+	fuzz_helper.CoverTab[2095]++
 	return OpCode(c.GetByte(n))
 }
 
 // GetByte returns the n'th byte in the contract's byte array
 func (c *Contract) GetByte(n uint64) byte {
+	fuzz_helper.CoverTab[21668]++
 	if n < uint64(len(c.Code)) {
+		fuzz_helper.CoverTab[16619]++
 		return c.Code[n]
+	} else {
+		fuzz_helper.CoverTab[12692]++
 	}
+	fuzz_helper.CoverTab[45213]++
 
 	return 0
 }
@@ -116,30 +113,39 @@ func (c *Contract) GetByte(n uint64) byte {
 // Caller will recursively call caller when the contract is a delegate
 // call, including that of caller's caller.
 func (c *Contract) Caller() common.Address {
+	fuzz_helper.CoverTab[42483]++
 	return c.CallerAddress
 }
 
 // UseGas attempts the use gas and subtracts it and returns true on success
 func (c *Contract) UseGas(gas uint64) (ok bool) {
+	fuzz_helper.CoverTab[6577]++
 	if c.Gas < gas {
+		fuzz_helper.CoverTab[64174]++
 		return false
+	} else {
+		fuzz_helper.CoverTab[38740]++
 	}
+	fuzz_helper.CoverTab[17393]++
 	c.Gas -= gas
 	return true
 }
 
 // Address returns the contracts address
 func (c *Contract) Address() common.Address {
+	fuzz_helper.CoverTab[35657]++
 	return c.self.Address()
 }
 
 // Value returns the contracts value (sent to it from it's caller)
 func (c *Contract) Value() *big.Int {
+	fuzz_helper.CoverTab[30358]++
 	return c.value
 }
 
 // SetCode sets the code to the contract
 func (self *Contract) SetCode(hash common.Hash, code []byte) {
+	fuzz_helper.CoverTab[23294]++
 	self.Code = code
 	self.CodeHash = hash
 }
@@ -147,7 +153,10 @@ func (self *Contract) SetCode(hash common.Hash, code []byte) {
 // SetCallCode sets the code of the contract and address of the backing data
 // object
 func (self *Contract) SetCallCode(addr *common.Address, hash common.Hash, code []byte) {
+	fuzz_helper.CoverTab[61639]++
 	self.Code = code
 	self.CodeHash = hash
 	self.CodeAddr = addr
 }
+
+var _ = fuzz_helper.CoverTab

@@ -1,20 +1,6 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
 package vm
+
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"math/big"
@@ -23,42 +9,52 @@ import (
 )
 
 func memorySha3(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[22588]++
 	return calcMemSize(stack.Back(0), stack.Back(1))
 }
 
 func memoryCallDataCopy(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[44810]++
 	return calcMemSize(stack.Back(0), stack.Back(2))
 }
 
 func memoryReturnDataCopy(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[5262]++
 	return calcMemSize(stack.Back(0), stack.Back(2))
 }
 
 func memoryCodeCopy(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[17878]++
 	return calcMemSize(stack.Back(0), stack.Back(2))
 }
 
 func memoryExtCodeCopy(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[45021]++
 	return calcMemSize(stack.Back(1), stack.Back(3))
 }
 
 func memoryMLoad(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[39040]++
 	return calcMemSize(stack.Back(0), big.NewInt(32))
 }
 
 func memoryMStore8(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[2095]++
 	return calcMemSize(stack.Back(0), big.NewInt(1))
 }
 
 func memoryMStore(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[21668]++
 	return calcMemSize(stack.Back(0), big.NewInt(32))
 }
 
 func memoryCreate(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[45213]++
 	return calcMemSize(stack.Back(1), stack.Back(2))
 }
 
 func memoryCall(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[16619]++
 	x := calcMemSize(stack.Back(5), stack.Back(6))
 	y := calcMemSize(stack.Back(3), stack.Back(4))
 
@@ -66,12 +62,14 @@ func memoryCall(stack *Stack) *big.Int {
 }
 
 func memoryCallCode(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[12692]++
 	x := calcMemSize(stack.Back(5), stack.Back(6))
 	y := calcMemSize(stack.Back(3), stack.Back(4))
 
 	return math.BigMax(x, y)
 }
 func memoryDelegateCall(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[42483]++
 	x := calcMemSize(stack.Back(4), stack.Back(5))
 	y := calcMemSize(stack.Back(2), stack.Back(3))
 
@@ -79,6 +77,7 @@ func memoryDelegateCall(stack *Stack) *big.Int {
 }
 
 func memoryStaticCall(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[6577]++
 	x := calcMemSize(stack.Back(4), stack.Back(5))
 	y := calcMemSize(stack.Back(2), stack.Back(3))
 
@@ -86,14 +85,19 @@ func memoryStaticCall(stack *Stack) *big.Int {
 }
 
 func memoryReturn(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[17393]++
 	return calcMemSize(stack.Back(0), stack.Back(1))
 }
 
 func memoryRevert(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[64174]++
 	return calcMemSize(stack.Back(0), stack.Back(1))
 }
 
 func memoryLog(stack *Stack) *big.Int {
+	fuzz_helper.CoverTab[38740]++
 	mSize, mStart := stack.Back(1), stack.Back(0)
 	return calcMemSize(mStart, mSize)
 }
+
+var _ = fuzz_helper.CoverTab

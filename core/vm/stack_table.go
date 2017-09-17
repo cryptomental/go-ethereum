@@ -1,20 +1,6 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
 package vm
+
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"fmt"
@@ -23,22 +9,36 @@ import (
 )
 
 func makeStackFunc(pop, push int) stackValidationFunc {
+	fuzz_helper.CoverTab[22588]++
 	return func(stack *Stack) error {
+		fuzz_helper.CoverTab[44810]++
 		if err := stack.require(pop); err != nil {
+			fuzz_helper.CoverTab[45021]++
 			return err
+		} else {
+			fuzz_helper.CoverTab[39040]++
 		}
+		fuzz_helper.CoverTab[5262]++
 
 		if stack.len()+push-pop > int(params.StackLimit) {
+			fuzz_helper.CoverTab[2095]++
 			return fmt.Errorf("stack limit reached %d (%d)", stack.len(), params.StackLimit)
+		} else {
+			fuzz_helper.CoverTab[21668]++
 		}
+		fuzz_helper.CoverTab[17878]++
 		return nil
 	}
 }
 
 func makeDupStackFunc(n int) stackValidationFunc {
+	fuzz_helper.CoverTab[45213]++
 	return makeStackFunc(n, n+1)
 }
 
 func makeSwapStackFunc(n int) stackValidationFunc {
+	fuzz_helper.CoverTab[16619]++
 	return makeStackFunc(n, n)
 }
+
+var _ = fuzz_helper.CoverTab

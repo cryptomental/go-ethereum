@@ -1,20 +1,6 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
 package vm
+
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"fmt"
@@ -24,14 +10,20 @@ import (
 type OpCode byte
 
 func (op OpCode) IsPush() bool {
+	fuzz_helper.CoverTab[22588]++
 	switch op {
 	case PUSH1, PUSH2, PUSH3, PUSH4, PUSH5, PUSH6, PUSH7, PUSH8, PUSH9, PUSH10, PUSH11, PUSH12, PUSH13, PUSH14, PUSH15, PUSH16, PUSH17, PUSH18, PUSH19, PUSH20, PUSH21, PUSH22, PUSH23, PUSH24, PUSH25, PUSH26, PUSH27, PUSH28, PUSH29, PUSH30, PUSH31, PUSH32:
+		fuzz_helper.CoverTab[5262]++
 		return true
+	default:
+		fuzz_helper.CoverTab[17878]++
 	}
+	fuzz_helper.CoverTab[44810]++
 	return false
 }
 
 func (op OpCode) IsStaticJump() bool {
+	fuzz_helper.CoverTab[45021]++
 	return op == JUMP
 }
 
@@ -210,7 +202,7 @@ const (
 
 // Since the opcodes aren't all in order we can't use a regular slice
 var opCodeToString = map[OpCode]string{
-	// 0x0 range - arithmetic ops
+
 	STOP:       "STOP",
 	ADD:        "ADD",
 	MUL:        "MUL",
@@ -229,7 +221,6 @@ var opCodeToString = map[OpCode]string{
 	ISZERO:     "ISZERO",
 	SIGNEXTEND: "SIGNEXTEND",
 
-	// 0x10 range - bit ops
 	AND:    "AND",
 	OR:     "OR",
 	XOR:    "XOR",
@@ -237,10 +228,8 @@ var opCodeToString = map[OpCode]string{
 	ADDMOD: "ADDMOD",
 	MULMOD: "MULMOD",
 
-	// 0x20 range - crypto
 	SHA3: "SHA3",
 
-	// 0x30 range - closure state
 	ADDRESS:        "ADDRESS",
 	BALANCE:        "BALANCE",
 	ORIGIN:         "ORIGIN",
@@ -257,7 +246,6 @@ var opCodeToString = map[OpCode]string{
 	RETURNDATASIZE: "RETURNDATASIZE",
 	RETURNDATACOPY: "RETURNDATACOPY",
 
-	// 0x40 range - block operations
 	BLOCKHASH:  "BLOCKHASH",
 	COINBASE:   "COINBASE",
 	TIMESTAMP:  "TIMESTAMP",
@@ -265,10 +253,8 @@ var opCodeToString = map[OpCode]string{
 	DIFFICULTY: "DIFFICULTY",
 	GASLIMIT:   "GASLIMIT",
 
-	// 0x50 range - 'storage' and execution
 	POP: "POP",
-	//DUP:     "DUP",
-	//SWAP:    "SWAP",
+
 	MLOAD:    "MLOAD",
 	MSTORE:   "MSTORE",
 	MSTORE8:  "MSTORE8",
@@ -281,7 +267,6 @@ var opCodeToString = map[OpCode]string{
 	GAS:      "GAS",
 	JUMPDEST: "JUMPDEST",
 
-	// 0x60 range - push
 	PUSH1:  "PUSH1",
 	PUSH2:  "PUSH2",
 	PUSH3:  "PUSH3",
@@ -354,7 +339,6 @@ var opCodeToString = map[OpCode]string{
 	LOG3:   "LOG3",
 	LOG4:   "LOG4",
 
-	// 0xf0 range
 	CREATE:       "CREATE",
 	CALL:         "CALL",
 	RETURN:       "RETURN",
@@ -370,10 +354,15 @@ var opCodeToString = map[OpCode]string{
 }
 
 func (o OpCode) String() string {
+	fuzz_helper.CoverTab[39040]++
 	str := opCodeToString[o]
 	if len(str) == 0 {
+		fuzz_helper.CoverTab[21668]++
 		return fmt.Sprintf("Missing opcode 0x%x", int(o))
+	} else {
+		fuzz_helper.CoverTab[45213]++
 	}
+	fuzz_helper.CoverTab[2095]++
 
 	return str
 }
@@ -516,5 +505,8 @@ var stringToOp = map[string]OpCode{
 }
 
 func StringToOp(str string) OpCode {
+	fuzz_helper.CoverTab[16619]++
 	return stringToOp[str]
 }
+
+var _ = fuzz_helper.CoverTab

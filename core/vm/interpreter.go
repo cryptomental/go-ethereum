@@ -1,20 +1,6 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
 package vm
+
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"fmt"
@@ -65,19 +51,25 @@ type Interpreter struct {
 
 // NewInterpreter returns a new instance of the Interpreter.
 func NewInterpreter(evm *EVM, cfg Config) *Interpreter {
-	// We use the STOP instruction whether to see
-	// the jump table was initialised. If it was not
-	// we'll set the default jump table.
+	fuzz_helper.CoverTab[22588]++
+
 	if !cfg.JumpTable[STOP].valid {
+		fuzz_helper.CoverTab[5262]++
 		switch {
 		case evm.ChainConfig().IsByzantium(evm.BlockNumber):
+			fuzz_helper.CoverTab[17878]++
 			cfg.JumpTable = byzantiumInstructionSet
 		case evm.ChainConfig().IsHomestead(evm.BlockNumber):
+			fuzz_helper.CoverTab[45021]++
 			cfg.JumpTable = homesteadInstructionSet
 		default:
+			fuzz_helper.CoverTab[39040]++
 			cfg.JumpTable = frontierInstructionSet
 		}
+	} else {
+		fuzz_helper.CoverTab[2095]++
 	}
+	fuzz_helper.CoverTab[44810]++
 
 	return &Interpreter{
 		evm:      evm,
@@ -88,18 +80,25 @@ func NewInterpreter(evm *EVM, cfg Config) *Interpreter {
 }
 
 func (in *Interpreter) enforceRestrictions(op OpCode, operation operation, stack *Stack) error {
+	fuzz_helper.CoverTab[21668]++
 	if in.evm.chainRules.IsByzantium {
+		fuzz_helper.CoverTab[16619]++
 		if in.readOnly {
-			// If the interpreter is operating in readonly mode, make sure no
-			// state-modifying operation is performed. The 3rd stack item
-			// for a call operation is the value. Transferring value from one
-			// account to the others means the state is modified and should also
-			// return with an error.
+			fuzz_helper.CoverTab[12692]++
+
 			if operation.writes || (op == CALL && stack.Back(2).BitLen() > 0) {
+				fuzz_helper.CoverTab[42483]++
 				return errWriteProtection
+			} else {
+				fuzz_helper.CoverTab[6577]++
 			}
+		} else {
+			fuzz_helper.CoverTab[17393]++
 		}
+	} else {
+		fuzz_helper.CoverTab[64174]++
 	}
+	fuzz_helper.CoverTab[45213]++
 	return nil
 }
 
@@ -110,23 +109,30 @@ func (in *Interpreter) enforceRestrictions(op OpCode, operation operation, stack
 // considered a revert-and-consume-all-gas operation. No error specific checks
 // should be handled to reduce complexity and errors further down the in.
 func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret []byte, err error) {
-	// Increment the call depth which is restricted to 1024
-	in.evm.depth++
-	defer func() { in.evm.depth-- }()
+	fuzz_helper.CoverTab[38740]++
 
-	// Reset the previous call's return data. It's unimportant to preserve the old buffer
-	// as every returning call will return new data anyway.
+	in.evm.depth++
+	defer func() { fuzz_helper.CoverTab[49217]++; in.evm.depth-- }()
+	fuzz_helper.CoverTab[35657]++
+
 	in.returnData = nil
 
-	// Don't bother with the execution if there's no code.
 	if len(contract.Code) == 0 {
+		fuzz_helper.CoverTab[34511]++
 		return nil, nil
+	} else {
+		fuzz_helper.CoverTab[64074]++
 	}
+	fuzz_helper.CoverTab[30358]++
 
-	codehash := contract.CodeHash // codehash is used when doing jump dest caching
+	codehash := contract.CodeHash
 	if codehash == (common.Hash{}) {
+		fuzz_helper.CoverTab[28614]++
 		codehash = crypto.Keccak256Hash(contract.Code)
+	} else {
+		fuzz_helper.CoverTab[39226]++
 	}
+	fuzz_helper.CoverTab[23294]++
 
 	var (
 		op    OpCode        // current opcode
@@ -141,90 +147,137 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 	contract.Input = input
 
 	defer func() {
+		fuzz_helper.CoverTab[2297]++
 		if err != nil && in.cfg.Debug {
+			fuzz_helper.CoverTab[40870]++
 			in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+		} else {
+			fuzz_helper.CoverTab[52877]++
 		}
 	}()
+	fuzz_helper.CoverTab[61639]++
 
-	// The Interpreter main run loop (contextual). This loop runs until either an
-	// explicit STOP, RETURN or SELFDESTRUCT is executed, an error occurred during
-	// the execution of one of the operations or until the done flag is set by the
-	// parent context.
 	for atomic.LoadInt32(&in.evm.abort) == 0 {
-		// Get the memory location of pc
+		fuzz_helper.CoverTab[778]++
+
 		op = contract.GetOp(pc)
 
-		// get the operation from the jump table matching the opcode
 		operation := in.cfg.JumpTable[op]
 		if err := in.enforceRestrictions(op, operation, stack); err != nil {
+			fuzz_helper.CoverTab[264]++
 			return nil, err
+		} else {
+			fuzz_helper.CoverTab[3566]++
 		}
+		fuzz_helper.CoverTab[33340]++
 
-		// if the op is invalid abort the process and return an error
 		if !operation.valid {
+			fuzz_helper.CoverTab[47636]++
 			return nil, fmt.Errorf("invalid opcode 0x%x", int(op))
+		} else {
+			fuzz_helper.CoverTab[8730]++
 		}
+		fuzz_helper.CoverTab[15638]++
 
-		// validate the stack and make sure there enough stack items available
-		// to perform the operation
 		if err := operation.validateStack(stack); err != nil {
+			fuzz_helper.CoverTab[20539]++
 			return nil, err
+		} else {
+			fuzz_helper.CoverTab[63931]++
 		}
+		fuzz_helper.CoverTab[45869]++
 
 		var memorySize uint64
-		// calculate the new memory size and expand the memory to fit
-		// the operation
+
 		if operation.memorySize != nil {
+			fuzz_helper.CoverTab[19009]++
 			memSize, overflow := bigUint64(operation.memorySize(stack))
 			if overflow {
+				fuzz_helper.CoverTab[50446]++
 				return nil, errGasUintOverflow
+			} else {
+				fuzz_helper.CoverTab[18500]++
 			}
-			// memory is expanded in words of 32 bytes. Gas
-			// is also calculated in words.
+			fuzz_helper.CoverTab[64748]++
+
 			if memorySize, overflow = math.SafeMul(toWordSize(memSize), 32); overflow {
+				fuzz_helper.CoverTab[52152]++
 				return nil, errGasUintOverflow
+			} else {
+				fuzz_helper.CoverTab[17111]++
 			}
+		} else {
+			fuzz_helper.CoverTab[9670]++
 		}
+		fuzz_helper.CoverTab[23368]++
 
 		if !in.cfg.DisableGasMetering {
-			// consume the gas and return an error if not enough gas is available.
-			// cost is explicitly set so that the capture state defer method cas get the proper cost
+			fuzz_helper.CoverTab[55848]++
+
 			cost, err = operation.gasCost(in.gasTable, in.evm, contract, stack, mem, memorySize)
 			if err != nil || !contract.UseGas(cost) {
+				fuzz_helper.CoverTab[50755]++
 				return nil, ErrOutOfGas
+			} else {
+				fuzz_helper.CoverTab[912]++
 			}
+		} else {
+			fuzz_helper.CoverTab[64631]++
 		}
+		fuzz_helper.CoverTab[12901]++
 		if memorySize > 0 {
+			fuzz_helper.CoverTab[15513]++
 			mem.Resize(memorySize)
+		} else {
+			fuzz_helper.CoverTab[17300]++
 		}
+		fuzz_helper.CoverTab[12499]++
 
 		if in.cfg.Debug {
+			fuzz_helper.CoverTab[16403]++
 			in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+		} else {
+			fuzz_helper.CoverTab[40937]++
 		}
+		fuzz_helper.CoverTab[42993]++
 
-		// execute the operation
 		res, err := operation.execute(&pc, in.evm, contract, mem, stack)
-		// verifyPool is a build flag. Pool verification makes sure the integrity
-		// of the integer pool by comparing values to a default value.
+
 		if verifyPool {
+			fuzz_helper.CoverTab[33825]++
 			verifyIntegerPool(in.intPool)
+		} else {
+			fuzz_helper.CoverTab[7237]++
 		}
-		// if the operation clears the return data (e.g. it has returning data)
-		// set the last return to the result of the operation.
+		fuzz_helper.CoverTab[30301]++
+
 		if operation.returns {
+			fuzz_helper.CoverTab[23248]++
 			in.returnData = res
+		} else {
+			fuzz_helper.CoverTab[52715]++
 		}
+		fuzz_helper.CoverTab[45210]++
 
 		switch {
 		case err != nil:
+			fuzz_helper.CoverTab[11389]++
 			return nil, err
 		case operation.reverts:
+			fuzz_helper.CoverTab[60629]++
 			return res, errExecutionReverted
 		case operation.halts:
+			fuzz_helper.CoverTab[23245]++
 			return res, nil
 		case !operation.jumps:
+			fuzz_helper.CoverTab[5383]++
 			pc++
+		default:
+			fuzz_helper.CoverTab[52957]++
 		}
 	}
+	fuzz_helper.CoverTab[11162]++
 	return nil, nil
 }
+
+var _ = fuzz_helper.CoverTab

@@ -1,20 +1,6 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
 package vm
+
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"math/big"
@@ -40,19 +26,31 @@ const (
 // The cost of gas was changed during the homestead price change HF. To allow for EIP150
 // to be implemented. The returned gas is gas - base * 63 / 64.
 func callGas(gasTable params.GasTable, availableGas, base uint64, callCost *big.Int) (uint64, error) {
+	fuzz_helper.CoverTab[22588]++
 	if gasTable.CreateBySuicide > 0 {
+		fuzz_helper.CoverTab[17878]++
 		availableGas = availableGas - base
 		gas := availableGas - availableGas/64
-		// If the bit length exceeds 64 bit we know that the newly calculated "gas" for EIP150
-		// is smaller than the requested amount. Therefor we return the new gas instead
-		// of returning an error.
+
 		if callCost.BitLen() > 64 || gas < callCost.Uint64() {
+			fuzz_helper.CoverTab[45021]++
 			return gas, nil
+		} else {
+			fuzz_helper.CoverTab[39040]++
 		}
+	} else {
+		fuzz_helper.CoverTab[2095]++
 	}
+	fuzz_helper.CoverTab[44810]++
 	if callCost.BitLen() > 64 {
+		fuzz_helper.CoverTab[21668]++
 		return 0, errGasUintOverflow
+	} else {
+		fuzz_helper.CoverTab[45213]++
 	}
+	fuzz_helper.CoverTab[5262]++
 
 	return callCost.Uint64(), nil
 }
+
+var _ = fuzz_helper.CoverTab

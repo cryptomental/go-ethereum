@@ -1,20 +1,6 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
 package vm
+
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"encoding/hex"
@@ -32,27 +18,27 @@ import (
 type Storage map[common.Hash]common.Hash
 
 func (self Storage) Copy() Storage {
+	fuzz_helper.CoverTab[22588]++
 	cpy := make(Storage)
 	for key, value := range self {
+		fuzz_helper.CoverTab[5262]++
 		cpy[key] = value
 	}
+	fuzz_helper.CoverTab[44810]++
 
 	return cpy
 }
 
-// LogConfig are the configuration options for structured logger the EVM
 type LogConfig struct {
-	DisableMemory  bool // disable memory capture
-	DisableStack   bool // disable stack capture
-	DisableStorage bool // disable storage capture
-	FullStorage    bool // show full storage (slow)
-	Limit          int  // maximum length of output, but zero means unlimited
+	DisableMemory  bool
+	DisableStack   bool
+	DisableStorage bool
+	FullStorage    bool
+	Limit          int
 }
 
 //go:generate gencodec -type StructLog -field-override structLogMarshaling -out gen_structlog.go
 
-// StructLog is emitted to the EVM each cycle and lists information about the current internal state
-// prior to the execution of the statement.
 type StructLog struct {
 	Pc         uint64                      `json:"pc"`
 	Op         OpCode                      `json:"op"`
@@ -66,7 +52,6 @@ type StructLog struct {
 	Err        error                       `json:"error"`
 }
 
-// overrides for gencodec
 type structLogMarshaling struct {
 	Stack   []*math.HexOrDecimal256
 	Gas     math.HexOrDecimal64
@@ -76,24 +61,15 @@ type structLogMarshaling struct {
 }
 
 func (s *StructLog) OpName() string {
+	fuzz_helper.CoverTab[17878]++
 	return s.Op.String()
 }
 
-// Tracer is used to collect execution traces from an EVM transaction
-// execution. CaptureState is called for each step of the VM with the
-// current VM state.
-// Note that reference types are actual VM data structures; make copies
-// if you need to retain them beyond the current call.
 type Tracer interface {
 	CaptureState(env *EVM, pc uint64, op OpCode, gas, cost uint64, memory *Memory, stack *Stack, contract *Contract, depth int, err error) error
 	CaptureEnd(output []byte, gasUsed uint64, t time.Duration, err error) error
 }
 
-// StructLogger is an EVM state logger and implements Tracer.
-//
-// StructLogger can capture state based on the given Log configuration and also keeps
-// a track record of modified storage which is used in reporting snapshots of the
-// contract their storage.
 type StructLogger struct {
 	cfg LogConfig
 
@@ -101,78 +77,98 @@ type StructLogger struct {
 	changedValues map[common.Address]Storage
 }
 
-// NewStructLogger returns a new logger
 func NewStructLogger(cfg *LogConfig) *StructLogger {
+	fuzz_helper.CoverTab[45021]++
 	logger := &StructLogger{
 		changedValues: make(map[common.Address]Storage),
 	}
 	if cfg != nil {
+		fuzz_helper.CoverTab[2095]++
 		logger.cfg = *cfg
+	} else {
+		fuzz_helper.CoverTab[21668]++
 	}
+	fuzz_helper.CoverTab[39040]++
 	return logger
 }
 
-// CaptureState logs a new structured log message and pushes it out to the environment
-//
-// CaptureState also tracks SSTORE ops to track dirty values.
 func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost uint64, memory *Memory, stack *Stack, contract *Contract, depth int, err error) error {
-	// check if already accumulated the specified number of logs
+	fuzz_helper.CoverTab[45213]++
+
 	if l.cfg.Limit != 0 && l.cfg.Limit <= len(l.logs) {
+		fuzz_helper.CoverTab[38740]++
 		return ErrTraceLimitReached
+	} else {
+		fuzz_helper.CoverTab[35657]++
 	}
+	fuzz_helper.CoverTab[16619]++
 
-	// initialise new changed values storage container for this contract
-	// if not present.
 	if l.changedValues[contract.Address()] == nil {
+		fuzz_helper.CoverTab[30358]++
 		l.changedValues[contract.Address()] = make(Storage)
+	} else {
+		fuzz_helper.CoverTab[23294]++
 	}
+	fuzz_helper.CoverTab[12692]++
 
-	// capture SSTORE opcodes and determine the changed value and store
-	// it in the local storage container.
 	if op == SSTORE && stack.len() >= 2 {
+		fuzz_helper.CoverTab[61639]++
 		var (
 			value   = common.BigToHash(stack.data[stack.len()-2])
 			address = common.BigToHash(stack.data[stack.len()-1])
 		)
 		l.changedValues[contract.Address()][address] = value
+	} else {
+		fuzz_helper.CoverTab[11162]++
 	}
-	// copy a snapstot of the current memory state to a new buffer
+	fuzz_helper.CoverTab[42483]++
+
 	var mem []byte
 	if !l.cfg.DisableMemory {
+		fuzz_helper.CoverTab[49217]++
 		mem = make([]byte, len(memory.Data()))
 		copy(mem, memory.Data())
+	} else {
+		fuzz_helper.CoverTab[34511]++
 	}
+	fuzz_helper.CoverTab[6577]++
 
-	// copy a snapshot of the current stack state to a new buffer
 	var stck []*big.Int
 	if !l.cfg.DisableStack {
+		fuzz_helper.CoverTab[64074]++
 		stck = make([]*big.Int, len(stack.Data()))
 		for i, item := range stack.Data() {
+			fuzz_helper.CoverTab[28614]++
 			stck[i] = new(big.Int).Set(item)
 		}
+	} else {
+		fuzz_helper.CoverTab[39226]++
 	}
+	fuzz_helper.CoverTab[17393]++
 
-	// Copy the storage based on the settings specified in the log config. If full storage
-	// is disabled (default) we can use the simple Storage.Copy method, otherwise we use
-	// the state object to query for all values (slow process).
 	var storage Storage
 	if !l.cfg.DisableStorage {
+		fuzz_helper.CoverTab[2297]++
 		if l.cfg.FullStorage {
+			fuzz_helper.CoverTab[40870]++
 			storage = make(Storage)
-			// Get the contract account and loop over each storage entry. This may involve looping over
-			// the trie and is a very expensive process.
 
 			env.StateDB.ForEachStorage(contract.Address(), func(key, value common.Hash) bool {
+				fuzz_helper.CoverTab[52877]++
 				storage[key] = value
-				// Return true, indicating we'd like to continue.
+
 				return true
 			})
 		} else {
-			// copy a snapshot of the current storage to a new container.
+			fuzz_helper.CoverTab[778]++
+
 			storage = l.changedValues[contract.Address()].Copy()
 		}
+	} else {
+		fuzz_helper.CoverTab[33340]++
 	}
-	// create a new snaptshot of the EVM.
+	fuzz_helper.CoverTab[64174]++
+
 	log := StructLog{pc, op, gas, cost, mem, memory.Len(), stck, storage, depth, err}
 
 	l.logs = append(l.logs, log)
@@ -180,57 +176,86 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 }
 
 func (l *StructLogger) CaptureEnd(output []byte, gasUsed uint64, t time.Duration, err error) error {
+	fuzz_helper.CoverTab[15638]++
 	fmt.Printf("0x%x", output)
 	if err != nil {
+		fuzz_helper.CoverTab[23368]++
 		fmt.Printf(" error: %v\n", err)
+	} else {
+		fuzz_helper.CoverTab[12901]++
 	}
+	fuzz_helper.CoverTab[45869]++
 	return nil
 }
 
-// StructLogs returns a list of captured log entries
 func (l *StructLogger) StructLogs() []StructLog {
+	fuzz_helper.CoverTab[12499]++
 	return l.logs
 }
 
-// WriteTrace writes a formatted trace to the given writer
 func WriteTrace(writer io.Writer, logs []StructLog) {
+	fuzz_helper.CoverTab[42993]++
 	for _, log := range logs {
+		fuzz_helper.CoverTab[30301]++
 		fmt.Fprintf(writer, "%-16spc=%08d gas=%v cost=%v", log.Op, log.Pc, log.Gas, log.GasCost)
 		if log.Err != nil {
+			fuzz_helper.CoverTab[8730]++
 			fmt.Fprintf(writer, " ERROR: %v", log.Err)
+		} else {
+			fuzz_helper.CoverTab[20539]++
 		}
+		fuzz_helper.CoverTab[45210]++
 		fmt.Fprintln(writer)
 
 		if len(log.Stack) > 0 {
+			fuzz_helper.CoverTab[63931]++
 			fmt.Fprintln(writer, "Stack:")
 			for i := len(log.Stack) - 1; i >= 0; i-- {
+				fuzz_helper.CoverTab[19009]++
 				fmt.Fprintf(writer, "%08d  %x\n", len(log.Stack)-i-1, math.PaddedBigBytes(log.Stack[i], 32))
 			}
+		} else {
+			fuzz_helper.CoverTab[64748]++
 		}
+		fuzz_helper.CoverTab[264]++
 		if len(log.Memory) > 0 {
+			fuzz_helper.CoverTab[50446]++
 			fmt.Fprintln(writer, "Memory:")
 			fmt.Fprint(writer, hex.Dump(log.Memory))
+		} else {
+			fuzz_helper.CoverTab[18500]++
 		}
+		fuzz_helper.CoverTab[3566]++
 		if len(log.Storage) > 0 {
+			fuzz_helper.CoverTab[52152]++
 			fmt.Fprintln(writer, "Storage:")
 			for h, item := range log.Storage {
+				fuzz_helper.CoverTab[17111]++
 				fmt.Fprintf(writer, "%x: %x\n", h, item)
 			}
+		} else {
+			fuzz_helper.CoverTab[9670]++
 		}
+		fuzz_helper.CoverTab[47636]++
 		fmt.Fprintln(writer)
 	}
 }
 
-// WriteLogs writes vm logs in a readable format to the given writer
 func WriteLogs(writer io.Writer, logs []*types.Log) {
+	fuzz_helper.CoverTab[55848]++
 	for _, log := range logs {
+		fuzz_helper.CoverTab[50755]++
 		fmt.Fprintf(writer, "LOG%d: %x bn=%d txi=%x\n", len(log.Topics), log.Address, log.BlockNumber, log.TxIndex)
 
 		for i, topic := range log.Topics {
+			fuzz_helper.CoverTab[64631]++
 			fmt.Fprintf(writer, "%08d  %x\n", i, topic)
 		}
+		fuzz_helper.CoverTab[912]++
 
 		fmt.Fprint(writer, hex.Dump(log.Data))
 		fmt.Fprintln(writer)
 	}
 }
+
+var _ = fuzz_helper.CoverTab

@@ -1,20 +1,6 @@
-// Copyright 2014 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
 package vm
+
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"crypto/sha256"
@@ -61,10 +47,15 @@ var PrecompiledContractsByzantium = map[common.Address]PrecompiledContract{
 
 // RunPrecompiledContract runs and evaluates the output of a precompiled contract.
 func RunPrecompiledContract(p PrecompiledContract, input []byte, contract *Contract) (ret []byte, err error) {
+	fuzz_helper.CoverTab[22588]++
 	gas := p.RequiredGas(input)
 	if contract.UseGas(gas) {
+		fuzz_helper.CoverTab[5262]++
 		return p.Run(input)
+	} else {
+		fuzz_helper.CoverTab[17878]++
 	}
+	fuzz_helper.CoverTab[44810]++
 	return nil, ErrOutOfGas
 }
 
@@ -72,32 +63,38 @@ func RunPrecompiledContract(p PrecompiledContract, input []byte, contract *Contr
 type ecrecover struct{}
 
 func (c *ecrecover) RequiredGas(input []byte) uint64 {
+	fuzz_helper.CoverTab[45021]++
 	return params.EcrecoverGas
 }
 
 func (c *ecrecover) Run(input []byte) ([]byte, error) {
+	fuzz_helper.CoverTab[39040]++
 	const ecRecoverInputLength = 128
 
 	input = common.RightPadBytes(input, ecRecoverInputLength)
-	// "input" is (hash, v, r, s), each 32 bytes
-	// but for ecrecover we want (r, s, v)
 
 	r := new(big.Int).SetBytes(input[64:96])
 	s := new(big.Int).SetBytes(input[96:128])
 	v := input[63] - 27
 
-	// tighter sig s values input homestead only apply to tx sigs
 	if !allZero(input[32:63]) || !crypto.ValidateSignatureValues(v, r, s, false) {
+		fuzz_helper.CoverTab[45213]++
 		return nil, nil
+	} else {
+		fuzz_helper.CoverTab[16619]++
 	}
-	// v needs to be at the end for libsecp256k1
-	pubKey, err := crypto.Ecrecover(input[:32], append(input[64:128], v))
-	// make sure the public key is a valid one
-	if err != nil {
-		return nil, nil
-	}
+	fuzz_helper.CoverTab[2095]++
 
-	// the first byte of pubkey is bitcoin heritage
+	pubKey, err := crypto.Ecrecover(input[:32], append(input[64:128], v))
+
+	if err != nil {
+		fuzz_helper.CoverTab[12692]++
+		return nil, nil
+	} else {
+		fuzz_helper.CoverTab[42483]++
+	}
+	fuzz_helper.CoverTab[21668]++
+
 	return common.LeftPadBytes(crypto.Keccak256(pubKey[1:])[12:], 32), nil
 }
 
@@ -109,9 +106,11 @@ type sha256hash struct{}
 // This method does not require any overflow checking as the input size gas costs
 // required for anything significant is so high it's impossible to pay for.
 func (c *sha256hash) RequiredGas(input []byte) uint64 {
+	fuzz_helper.CoverTab[6577]++
 	return uint64(len(input)+31)/32*params.Sha256PerWordGas + params.Sha256BaseGas
 }
 func (c *sha256hash) Run(input []byte) ([]byte, error) {
+	fuzz_helper.CoverTab[17393]++
 	h := sha256.Sum256(input)
 	return h[:], nil
 }
@@ -124,9 +123,11 @@ type ripemd160hash struct{}
 // This method does not require any overflow checking as the input size gas costs
 // required for anything significant is so high it's impossible to pay for.
 func (c *ripemd160hash) RequiredGas(input []byte) uint64 {
+	fuzz_helper.CoverTab[64174]++
 	return uint64(len(input)+31)/32*params.Ripemd160PerWordGas + params.Ripemd160BaseGas
 }
 func (c *ripemd160hash) Run(input []byte) ([]byte, error) {
+	fuzz_helper.CoverTab[38740]++
 	ripemd := ripemd160.New()
 	ripemd.Write(input)
 	return common.LeftPadBytes(ripemd.Sum(nil), 32), nil
@@ -140,9 +141,11 @@ type dataCopy struct{}
 // This method does not require any overflow checking as the input size gas costs
 // required for anything significant is so high it's impossible to pay for.
 func (c *dataCopy) RequiredGas(input []byte) uint64 {
+	fuzz_helper.CoverTab[35657]++
 	return uint64(len(input)+31)/32*params.IdentityPerWordGas + params.IdentityBaseGas
 }
 func (c *dataCopy) Run(in []byte) ([]byte, error) {
+	fuzz_helper.CoverTab[30358]++
 	return in, nil
 }
 
@@ -165,79 +168,111 @@ var (
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 func (c *bigModExp) RequiredGas(input []byte) uint64 {
+	fuzz_helper.CoverTab[23294]++
 	var (
 		baseLen = new(big.Int).SetBytes(getData(input, 0, 32))
 		expLen  = new(big.Int).SetBytes(getData(input, 32, 32))
 		modLen  = new(big.Int).SetBytes(getData(input, 64, 32))
 	)
 	if len(input) > 96 {
+		fuzz_helper.CoverTab[39226]++
 		input = input[96:]
 	} else {
+		fuzz_helper.CoverTab[2297]++
 		input = input[:0]
 	}
+	fuzz_helper.CoverTab[61639]++
 	// Retrieve the head 32 bytes of exp for the adjusted exponent length
 	var expHead *big.Int
 	if big.NewInt(int64(len(input))).Cmp(baseLen) <= 0 {
+		fuzz_helper.CoverTab[40870]++
 		expHead = new(big.Int)
 	} else {
+		fuzz_helper.CoverTab[52877]++
 		if expLen.Cmp(big32) > 0 {
+			fuzz_helper.CoverTab[778]++
 			expHead = new(big.Int).SetBytes(getData(input, baseLen.Uint64(), 32))
 		} else {
+			fuzz_helper.CoverTab[33340]++
 			expHead = new(big.Int).SetBytes(getData(input, baseLen.Uint64(), expLen.Uint64()))
 		}
 	}
+	fuzz_helper.CoverTab[11162]++
 	// Calculate the adjusted exponent length
 	var msb int
 	if bitlen := expHead.BitLen(); bitlen > 0 {
+		fuzz_helper.CoverTab[15638]++
 		msb = bitlen - 1
+	} else {
+		fuzz_helper.CoverTab[45869]++
 	}
+	fuzz_helper.CoverTab[49217]++
 	adjExpLen := new(big.Int)
 	if expLen.Cmp(big32) > 0 {
+		fuzz_helper.CoverTab[23368]++
 		adjExpLen.Sub(expLen, big32)
 		adjExpLen.Mul(big8, adjExpLen)
+	} else {
+		fuzz_helper.CoverTab[12901]++
 	}
+	fuzz_helper.CoverTab[34511]++
 	adjExpLen.Add(adjExpLen, big.NewInt(int64(msb)))
 
-	// Calculate the gas cost of the operation
 	gas := new(big.Int).Set(math.BigMax(modLen, baseLen))
 	switch {
 	case gas.Cmp(big64) <= 0:
+		fuzz_helper.CoverTab[12499]++
 		gas.Mul(gas, gas)
 	case gas.Cmp(big1024) <= 0:
+		fuzz_helper.CoverTab[42993]++
 		gas = new(big.Int).Add(
 			new(big.Int).Div(new(big.Int).Mul(gas, gas), big4),
 			new(big.Int).Sub(new(big.Int).Mul(big96, gas), big3072),
 		)
 	default:
+		fuzz_helper.CoverTab[30301]++
 		gas = new(big.Int).Add(
 			new(big.Int).Div(new(big.Int).Mul(gas, gas), big16),
 			new(big.Int).Sub(new(big.Int).Mul(big480, gas), big199680),
 		)
 	}
+	fuzz_helper.CoverTab[64074]++
 	gas.Mul(gas, math.BigMax(adjExpLen, big1))
 	gas.Div(gas, new(big.Int).SetUint64(params.ModExpQuadCoeffDiv))
 
 	if gas.BitLen() > 64 {
+		fuzz_helper.CoverTab[45210]++
 		return math.MaxUint64
+	} else {
+		fuzz_helper.CoverTab[264]++
 	}
+	fuzz_helper.CoverTab[28614]++
 	return gas.Uint64()
 }
 
 func (c *bigModExp) Run(input []byte) ([]byte, error) {
+	fuzz_helper.CoverTab[3566]++
 	var (
 		baseLen = new(big.Int).SetBytes(getData(input, 0, 32)).Uint64()
 		expLen  = new(big.Int).SetBytes(getData(input, 32, 32)).Uint64()
 		modLen  = new(big.Int).SetBytes(getData(input, 64, 32)).Uint64()
 	)
 	if len(input) > 96 {
+		fuzz_helper.CoverTab[63931]++
 		input = input[96:]
 	} else {
+		fuzz_helper.CoverTab[19009]++
 		input = input[:0]
 	}
-	// Handle a special case when both the base and mod length is zero
+	fuzz_helper.CoverTab[47636]++
+
 	if baseLen == 0 && modLen == 0 {
+		fuzz_helper.CoverTab[64748]++
 		return []byte{}, nil
+	} else {
+		fuzz_helper.CoverTab[50446]++
 	}
+	fuzz_helper.CoverTab[8730]++
 	// Retrieve the operands and execute the exponentiation
 	var (
 		base = new(big.Int).SetBytes(getData(input, 0, baseLen))
@@ -245,9 +280,13 @@ func (c *bigModExp) Run(input []byte) ([]byte, error) {
 		mod  = new(big.Int).SetBytes(getData(input, baseLen+expLen, modLen))
 	)
 	if mod.BitLen() == 0 {
-		// Modulo 0 is undefined, return zero
+		fuzz_helper.CoverTab[18500]++
+
 		return common.LeftPadBytes([]byte{}, int(modLen)), nil
+	} else {
+		fuzz_helper.CoverTab[52152]++
 	}
+	fuzz_helper.CoverTab[20539]++
 	return common.LeftPadBytes(base.Exp(base, exp, mod).Bytes(), int(modLen)), nil
 }
 
@@ -264,29 +303,47 @@ var (
 // newCurvePoint unmarshals a binary blob into a bn256 elliptic curve point,
 // returning it, or an error if the point is invalid.
 func newCurvePoint(blob []byte) (*bn256.G1, error) {
+	fuzz_helper.CoverTab[17111]++
 	p, onCurve := new(bn256.G1).Unmarshal(blob)
 	if !onCurve {
+		fuzz_helper.CoverTab[50755]++
 		return nil, errNotOnCurve
+	} else {
+		fuzz_helper.CoverTab[912]++
 	}
+	fuzz_helper.CoverTab[9670]++
 	gx, gy, _, _ := p.CurvePoints()
 	if gx.Cmp(bn256.P) >= 0 || gy.Cmp(bn256.P) >= 0 {
+		fuzz_helper.CoverTab[64631]++
 		return nil, errInvalidCurvePoint
+	} else {
+		fuzz_helper.CoverTab[15513]++
 	}
+	fuzz_helper.CoverTab[55848]++
 	return p, nil
 }
 
 // newTwistPoint unmarshals a binary blob into a bn256 elliptic curve point,
 // returning it, or an error if the point is invalid.
 func newTwistPoint(blob []byte) (*bn256.G2, error) {
+	fuzz_helper.CoverTab[17300]++
 	p, onCurve := new(bn256.G2).Unmarshal(blob)
 	if !onCurve {
+		fuzz_helper.CoverTab[33825]++
 		return nil, errNotOnCurve
+	} else {
+		fuzz_helper.CoverTab[7237]++
 	}
+	fuzz_helper.CoverTab[16403]++
 	x2, y2, _, _ := p.CurvePoints()
 	if x2.Real().Cmp(bn256.P) >= 0 || x2.Imag().Cmp(bn256.P) >= 0 ||
 		y2.Real().Cmp(bn256.P) >= 0 || y2.Imag().Cmp(bn256.P) >= 0 {
+		fuzz_helper.CoverTab[23248]++
 		return nil, errInvalidCurvePoint
+	} else {
+		fuzz_helper.CoverTab[52715]++
 	}
+	fuzz_helper.CoverTab[40937]++
 	return p, nil
 }
 
@@ -295,18 +352,28 @@ type bn256Add struct{}
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 func (c *bn256Add) RequiredGas(input []byte) uint64 {
+	fuzz_helper.CoverTab[11389]++
 	return params.Bn256AddGas
 }
 
 func (c *bn256Add) Run(input []byte) ([]byte, error) {
+	fuzz_helper.CoverTab[60629]++
 	x, err := newCurvePoint(getData(input, 0, 64))
 	if err != nil {
+		fuzz_helper.CoverTab[52957]++
 		return nil, err
+	} else {
+		fuzz_helper.CoverTab[6211]++
 	}
+	fuzz_helper.CoverTab[23245]++
 	y, err := newCurvePoint(getData(input, 64, 64))
 	if err != nil {
+		fuzz_helper.CoverTab[49245]++
 		return nil, err
+	} else {
+		fuzz_helper.CoverTab[15785]++
 	}
+	fuzz_helper.CoverTab[5383]++
 	res := new(bn256.G1)
 	res.Add(x, y)
 	return res.Marshal(), nil
@@ -317,14 +384,20 @@ type bn256ScalarMul struct{}
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 func (c *bn256ScalarMul) RequiredGas(input []byte) uint64 {
+	fuzz_helper.CoverTab[9735]++
 	return params.Bn256ScalarMulGas
 }
 
 func (c *bn256ScalarMul) Run(input []byte) ([]byte, error) {
+	fuzz_helper.CoverTab[45823]++
 	p, err := newCurvePoint(getData(input, 0, 64))
 	if err != nil {
+		fuzz_helper.CoverTab[24978]++
 		return nil, err
+	} else {
+		fuzz_helper.CoverTab[61755]++
 	}
+	fuzz_helper.CoverTab[48647]++
 	res := new(bn256.G1)
 	res.ScalarMult(p, new(big.Int).SetBytes(getData(input, 64, 32)))
 	return res.Marshal(), nil
@@ -346,34 +419,56 @@ type bn256Pairing struct{}
 
 // RequiredGas returns the gas required to execute the pre-compiled contract.
 func (c *bn256Pairing) RequiredGas(input []byte) uint64 {
+	fuzz_helper.CoverTab[19607]++
 	return params.Bn256PairingBaseGas + uint64(len(input)/192)*params.Bn256PairingPerPointGas
 }
 
 func (c *bn256Pairing) Run(input []byte) ([]byte, error) {
-	// Handle some corner cases cheaply
+	fuzz_helper.CoverTab[28743]++
+
 	if len(input)%192 > 0 {
+		fuzz_helper.CoverTab[47485]++
 		return nil, errBadPairingInput
+	} else {
+		fuzz_helper.CoverTab[60075]++
 	}
+	fuzz_helper.CoverTab[8832]++
 	// Convert the input into a set of coordinates
 	var (
 		cs []*bn256.G1
 		ts []*bn256.G2
 	)
 	for i := 0; i < len(input); i += 192 {
+		fuzz_helper.CoverTab[21817]++
 		c, err := newCurvePoint(input[i : i+64])
 		if err != nil {
+			fuzz_helper.CoverTab[3661]++
 			return nil, err
+		} else {
+			fuzz_helper.CoverTab[22210]++
 		}
+		fuzz_helper.CoverTab[57682]++
 		t, err := newTwistPoint(input[i+64 : i+192])
 		if err != nil {
+			fuzz_helper.CoverTab[4417]++
 			return nil, err
+		} else {
+			fuzz_helper.CoverTab[5093]++
 		}
+		fuzz_helper.CoverTab[45496]++
 		cs = append(cs, c)
 		ts = append(ts, t)
 	}
-	// Execute the pairing checks and return the results
+	fuzz_helper.CoverTab[40052]++
+
 	if bn256.PairingCheck(cs, ts) {
+		fuzz_helper.CoverTab[56274]++
 		return true32Byte, nil
+	} else {
+		fuzz_helper.CoverTab[1404]++
 	}
+	fuzz_helper.CoverTab[63449]++
 	return false32Byte, nil
 }
+
+var _ = fuzz_helper.CoverTab

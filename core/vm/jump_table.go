@@ -1,20 +1,6 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
 package vm
+
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"errors"
@@ -59,7 +45,8 @@ var (
 // NewByzantiumInstructionSet returns the frontier, homestead and
 // byzantium instructions.
 func NewByzantiumInstructionSet() [256]operation {
-	// instructions that can be executed during the homestead phase.
+	fuzz_helper.CoverTab[22588]++
+
 	instructionSet := NewHomesteadInstructionSet()
 	instructionSet[STATICCALL] = operation{
 		execute:       opStaticCall,
@@ -97,6 +84,7 @@ func NewByzantiumInstructionSet() [256]operation {
 // NewHomesteadInstructionSet returns the frontier and homestead
 // instructions that can be executed during the homestead phase.
 func NewHomesteadInstructionSet() [256]operation {
+	fuzz_helper.CoverTab[44810]++
 	instructionSet := NewFrontierInstructionSet()
 	instructionSet[DELEGATECALL] = operation{
 		execute:       opDelegateCall,
@@ -112,6 +100,7 @@ func NewHomesteadInstructionSet() [256]operation {
 // NewFrontierInstructionSet returns the frontier instructions
 // that can be executed during the frontier phase.
 func NewFrontierInstructionSet() [256]operation {
+	fuzz_helper.CoverTab[5262]++
 	return [256]operation{
 		STOP: {
 			execute:       opStop,
@@ -922,3 +911,5 @@ func NewFrontierInstructionSet() [256]operation {
 		},
 	}
 }
+
+var _ = fuzz_helper.CoverTab
