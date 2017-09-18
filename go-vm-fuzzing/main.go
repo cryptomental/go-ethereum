@@ -90,9 +90,29 @@ func FormatLogs(structLogs []vm.StructLog) []StructLogRes {
 	}
 	return formattedStructLogs
 }
-//in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+
+var g_addresses = make([]uint64, 0)
+var g_opcodes = make([]uint64, 0)
+var g_trace_idx int;
+
+//export getTrace
+func getTrace(finished *int, address *uint64, opcode *uint64 ) {
+    if g_trace_idx >= len(g_addresses) {
+        *finished = 1
+        return
+    }
+    *address = g_addresses[g_trace_idx]
+    *opcode = g_opcodes[g_trace_idx]
+    *finished = 0
+    g_trace_idx++
+}
+
 //export runVM
 func runVM(input []byte, success *int, do_trace int) {
+
+    g_addresses = nil
+    g_opcodes = nil
+    g_trace_idx = 0
 
 	db, _ := ethdb.NewMemDatabase()
 	sdb := state.NewDatabase(db)
@@ -120,6 +140,11 @@ func runVM(input []byte, success *int, do_trace int) {
         *success = 1
     } else {
         *success = 0
+    }
+    for _, t := range tracer.StructLogs() {
+        g_addresses = append(g_addresses, t.Pc)
+        var o = uint64(t.Op)
+        g_opcodes = append(g_opcodes, o)
     }
     if do_trace != 0 {
         for _, t := range tracer.StructLogs() {
