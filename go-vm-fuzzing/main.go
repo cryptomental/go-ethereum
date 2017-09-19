@@ -114,6 +114,7 @@ func runVM(input []byte, success *int, do_trace int) {
 
     g_addresses = nil
     g_opcodes = nil
+    g_gases = nil
     g_trace_idx = 0
 
 	db, _ := ethdb.NewMemDatabase()
