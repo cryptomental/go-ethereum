@@ -93,16 +93,18 @@ func FormatLogs(structLogs []vm.StructLog) []StructLogRes {
 
 var g_addresses = make([]uint64, 0)
 var g_opcodes = make([]uint64, 0)
+var g_gases = make([]uint64, 0)
 var g_trace_idx int;
 
 //export getTrace
-func getTrace(finished *int, address *uint64, opcode *uint64 ) {
+func getTrace(finished *int, address *uint64, opcode *uint64, gas *uint64 ) {
     if g_trace_idx >= len(g_addresses) {
         *finished = 1
         return
     }
     *address = g_addresses[g_trace_idx]
     *opcode = g_opcodes[g_trace_idx]
+    *gas= g_gases[g_trace_idx]
     *finished = 0
     g_trace_idx++
 }
@@ -145,6 +147,7 @@ func runVM(input []byte, success *int, do_trace int) {
         g_addresses = append(g_addresses, t.Pc)
         var o = uint64(t.Op)
         g_opcodes = append(g_opcodes, o)
+        g_gases = append(g_gases, t.Gas)
     }
     if do_trace != 0 {
         for _, t := range tracer.StructLogs() {
