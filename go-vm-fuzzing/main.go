@@ -46,7 +46,7 @@ func (account) Value() *big.Int                                     { return nil
 func (account) SetBalance(*big.Int)                                 {}
 func (account) SetNonce(uint64)                                     {}
 func (account) Balance() *big.Int                                   { return nil }
-func (account) Address() common.Address                             { return common.Address{} }
+func (account) Address() common.Address                             { a := new(big.Int).SetUint64(0x155); return common.BigToAddress(a); }
 func (account) ReturnGas(*big.Int)                                  {}
 func (account) SetCode(common.Hash, []byte)                         {}
 func (account) ForEachStorage(cb func(key, value common.Hash) bool) {}
