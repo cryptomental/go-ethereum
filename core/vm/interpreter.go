@@ -111,6 +111,7 @@ func (in *Interpreter) enforceRestrictions(op OpCode, operation operation, stack
 func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret []byte, err error) {
 	fuzz_helper.CoverTab[38740]++
 
+    logged := false
 	in.evm.depth++
 	defer func() { fuzz_helper.CoverTab[49217]++; in.evm.depth-- }()
 	fuzz_helper.CoverTab[35657]++
@@ -150,7 +151,9 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		fuzz_helper.CoverTab[2297]++
 		if err != nil && in.cfg.Debug {
 			fuzz_helper.CoverTab[40870]++
-			in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+            if logged == false {
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+            }
 		} else {
 			fuzz_helper.CoverTab[52877]++
 		}
@@ -158,6 +161,7 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 	fuzz_helper.CoverTab[61639]++
 
 	for atomic.LoadInt32(&in.evm.abort) == 0 {
+        logged = false
 		fuzz_helper.CoverTab[778]++
 
         if pc >= uint64(len(contract.Code)) {
@@ -239,6 +243,7 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		if in.cfg.Debug {
 			fuzz_helper.CoverTab[16403]++
 			in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+            logged = true
 		} else {
 			fuzz_helper.CoverTab[40937]++
 		}
