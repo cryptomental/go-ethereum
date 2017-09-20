@@ -160,6 +160,9 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 	for atomic.LoadInt32(&in.evm.abort) == 0 {
 		fuzz_helper.CoverTab[778]++
 
+        if pc >= uint64(len(contract.Code)) {
+            break;
+        }
 		op = contract.GetOp(pc)
 
 		operation := in.cfg.JumpTable[op]
