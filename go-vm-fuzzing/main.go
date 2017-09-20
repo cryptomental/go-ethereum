@@ -143,6 +143,9 @@ func runVM(input []byte, success *int, do_trace int) {
     if err == nil {
         *success = 1
     } else {
+        if do_trace != 0 {
+            fmt.Printf("err is %v\n", err);
+        }
         *success = 0
     }
     for _, t := range tracer.StructLogs() {
@@ -154,6 +157,8 @@ func runVM(input []byte, success *int, do_trace int) {
     if do_trace != 0 {
         for _, t := range tracer.StructLogs() {
             fmt.Printf("%v : %v\n", t.Pc, t.Op)
+            fmt.Printf("Stack: %v\n", t.Stack)
+            fmt.Printf("Gas: %v\n", t.Gas)
             /*
             fmt.Printf("Op: %v\n", t.Op)
             fmt.Printf("Gas: %v\n", t.Gas)
