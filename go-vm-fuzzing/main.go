@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
+//	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/params"
@@ -129,6 +129,7 @@ func runVM(input []byte, success *int, do_trace int) {
 		GetHash:     vmTestBlockHash,
 		BlockNumber: new(big.Int).SetUint64(1000),
 		Time:   new(big.Int).SetUint64(1000),
+		Coinbase:   common.Address{},
 		GasLimit:   new(big.Int).SetUint64(1000),
 		Difficulty:   new(big.Int).SetUint64(1000),
 		GasPrice:   new(big.Int).SetUint64(1000),
@@ -167,7 +168,8 @@ func runVM(input []byte, success *int, do_trace int) {
 }
 
 func vmTestBlockHash(n uint64) common.Hash {
-	return common.BytesToHash(crypto.Keccak256([]byte(big.NewInt(int64(n)).String())))
+    i := new(big.Int).SetUint64(123)
+    return common.BigToHash(i)
 }
 
 func main() { }
