@@ -110,7 +110,7 @@ func getTrace(finished *int, address *uint64, opcode *uint64, gas *uint64 ) {
 }
 
 //export runVM
-func runVM(input []byte, success *int, do_trace int) {
+func runVM(input []byte, success *int, do_trace int, gas uint64) {
 
     g_addresses = nil
     g_opcodes = nil
@@ -136,7 +136,7 @@ func runVM(input []byte, success *int, do_trace int) {
 	}
     tracer := vm.NewStructLogger(nil)
     env := vm.NewEVM(context, statedb, params.TestChainConfig, vm.Config{Debug: true, Tracer: tracer})
-	contract := vm.NewContract(account{}, account{}, big.NewInt(0), 150)
+	contract := vm.NewContract(account{}, account{}, big.NewInt(0), gas)
 	contract.Code = input
 
     _, err := env.Interpreter().Run(0, contract, []byte{})
