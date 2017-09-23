@@ -167,7 +167,7 @@ func runVM(
 		GasPrice:   new(big.Int).SetUint64(gasprice),
 	}
     tracer := vm.NewStructLogger(nil)
-    env := vm.NewEVM(context, statedb, params.TestChainConfig, vm.Config{Debug: true, Tracer: tracer})
+    env := vm.NewEVM(context, statedb, params.MainnetChainConfig, vm.Config{Debug: true, Tracer: tracer})
 	contract := vm.NewContract(account{}, account{}, big.NewInt(0), gas)
 	contract.Code = input
 
