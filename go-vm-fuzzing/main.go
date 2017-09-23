@@ -96,6 +96,9 @@ var g_opcodes = make([]uint64, 0)
 var g_gases = make([]uint64, 0)
 var g_trace_idx int;
 
+var g_stack = make([](big.Int), 0);
+var g_stack_idx int;
+
 //export getTrace
 func getTrace(finished *int, address *uint64, opcode *uint64, gas *uint64 ) {
     if g_trace_idx >= len(g_addresses) {
@@ -109,6 +112,23 @@ func getTrace(finished *int, address *uint64, opcode *uint64, gas *uint64 ) {
     g_trace_idx++
 }
 
+//export getStack
+func getStack(finished *int, stackitem []byte) {
+    if g_stack_idx >= len(g_stack) {
+        g_stack_idx = 0
+        *finished = 1
+        return
+    }
+
+    stackitem_len := len(g_stack[g_stack_idx].Bytes())
+    if stackitem_len > 32 {
+        panic("stackitem too long")
+    }
+    copy(stackitem, g_stack[g_stack_idx].Bytes())
+    *finished = 0
+    g_stack_idx++
+}
+
 //export runVM
 func runVM(input []byte, success *int, do_trace int, gas uint64) {
 
@@ -116,6 +136,9 @@ func runVM(input []byte, success *int, do_trace int, gas uint64) {
     g_opcodes = nil
     g_gases = nil
     g_trace_idx = 0
+
+    g_stack = nil
+    g_stack_idx = 0
 
 	db, _ := ethdb.NewMemDatabase()
 	sdb := state.NewDatabase(db)
@@ -148,14 +171,26 @@ func runVM(input []byte, success *int, do_trace int, gas uint64) {
         }
         *success = 0
     }
-    for _, t := range tracer.StructLogs() {
+
+    logs := tracer.StructLogs()
+    i := 0
+    loglen := len(logs)
+    for _, t := range logs {
+        i++
+        if i == loglen {
+            for _, t2 := range t.Stack {
+                fmt.Printf("t2 is %v\n", *t2);
+                g_stack = append(g_stack, *t2)
+            }
+        }
         g_addresses = append(g_addresses, t.Pc)
         var o = uint64(t.Op)
         g_opcodes = append(g_opcodes, o)
         g_gases = append(g_gases, t.Gas)
     }
+
     if do_trace != 0 {
-        for _, t := range tracer.StructLogs() {
+        for _, t := range logs {
             fmt.Printf("%v : %v\n", t.Pc, t.Op)
             fmt.Printf("Stack: %v\n", t.Stack)
             fmt.Printf("Gas: %v\n", t.Gas)
