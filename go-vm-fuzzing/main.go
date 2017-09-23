@@ -198,10 +198,13 @@ func runVM(
     }
 
     if do_trace != 0 {
+        execution_num := 1
         for _, t := range logs {
-            fmt.Printf("%v : %v\n", t.Pc, t.Op)
+            fmt.Printf("[%v] %v : %v\n", execution_num, t.Pc, t.Op)
             fmt.Printf("Stack: %v\n", t.Stack)
             fmt.Printf("Gas: %v\n", t.Gas)
+
+            execution_num++;
             /*
             fmt.Printf("Op: %v\n", t.Op)
             fmt.Printf("Gas: %v\n", t.Gas)
