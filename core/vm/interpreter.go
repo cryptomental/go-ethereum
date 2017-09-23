@@ -240,6 +240,10 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		}
 		fuzz_helper.CoverTab[12499]++
 
+		fuzz_helper.CoverTab[42993]++
+
+		res, err := operation.execute(&pc, in.evm, contract, mem, stack)
+
 		if in.cfg.Debug {
 			fuzz_helper.CoverTab[16403]++
 			in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
@@ -247,9 +251,6 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		} else {
 			fuzz_helper.CoverTab[40937]++
 		}
-		fuzz_helper.CoverTab[42993]++
-
-		res, err := operation.execute(&pc, in.evm, contract, mem, stack)
 
 		if verifyPool {
 			fuzz_helper.CoverTab[33825]++
