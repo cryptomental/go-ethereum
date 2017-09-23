@@ -242,11 +242,12 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 
 		fuzz_helper.CoverTab[42993]++
 
+        oldpc := pc
 		res, err := operation.execute(&pc, in.evm, contract, mem, stack)
 
 		if in.cfg.Debug {
 			fuzz_helper.CoverTab[16403]++
-			in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+			in.cfg.Tracer.CaptureState(in.evm, oldpc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
             logged = true
 		} else {
 			fuzz_helper.CoverTab[40937]++
