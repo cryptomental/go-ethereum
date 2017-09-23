@@ -179,7 +179,6 @@ func runVM(input []byte, success *int, do_trace int, gas uint64) {
         i++
         if i == loglen {
             for _, t2 := range t.Stack {
-                fmt.Printf("t2 is %v\n", *t2);
                 g_stack = append(g_stack, *t2)
             }
         }
