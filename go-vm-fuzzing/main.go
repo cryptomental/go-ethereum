@@ -130,7 +130,16 @@ func getStack(finished *int, stackitem []byte) {
 }
 
 //export runVM
-func runVM(input []byte, success *int, do_trace int, gas uint64) {
+func runVM(
+    input []byte,
+    success *int,
+    do_trace int,
+    gas uint64,
+    blocknumber uint64,
+    time uint64,
+    gaslimit uint64,
+    difficulty uint64,
+    gasprice uint64) {
 
     g_addresses = nil
     g_opcodes = nil
@@ -150,12 +159,12 @@ func runVM(input []byte, success *int, do_trace int, gas uint64) {
 	context := vm.Context{
 		CanTransfer: canTransfer,
 		GetHash:     vmTestBlockHash,
-		BlockNumber: new(big.Int).SetUint64(1000),
-		Time:   new(big.Int).SetUint64(1000),
+		BlockNumber: new(big.Int).SetUint64(blocknumber),
+		Time:   new(big.Int).SetUint64(time),
 		Coinbase:   common.Address{},
-		GasLimit:   new(big.Int).SetUint64(1000),
-		Difficulty:   new(big.Int).SetUint64(1000),
-		GasPrice:   new(big.Int).SetUint64(1000),
+		GasLimit:   new(big.Int).SetUint64(gaslimit),
+		Difficulty:   new(big.Int).SetUint64(difficulty),
+		GasPrice:   new(big.Int).SetUint64(gasprice),
 	}
     tracer := vm.NewStructLogger(nil)
     env := vm.NewEVM(context, statedb, params.TestChainConfig, vm.Config{Debug: true, Tracer: tracer})
