@@ -154,10 +154,16 @@ func runVM(
 	statedb, _ := state.New(common.Hash{}, sdb)
 
 	canTransfer := func(db vm.StateDB, address common.Address, amount *big.Int) bool {
-        return false;
+        return db.GetBalance(address).Cmp(amount) >= 0
 	}
+    transfer := func(db vm.StateDB, sender, recipient common.Address, amount *big.Int) {
+        db.SubBalance(sender, amount)
+        db.AddBalance(recipient, amount)
+    }
+
 	context := vm.Context{
 		CanTransfer: canTransfer,
+		Transfer: transfer,
 		GetHash:     vmTestBlockHash,
 		BlockNumber: new(big.Int).SetUint64(blocknumber),
 		Time:   new(big.Int).SetUint64(time),
