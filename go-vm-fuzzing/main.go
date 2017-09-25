@@ -11,7 +11,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/vm"
-//	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/params"
@@ -62,6 +61,7 @@ type StructLogRes struct {
 	Memory  []string          `json:"memory"`
 	Storage map[string]string `json:"storage"`
 }
+
 func FormatLogs(structLogs []vm.StructLog) []StructLogRes {
 	formattedStructLogs := make([]StructLogRes, len(structLogs))
 	for index, trace := range structLogs {
@@ -99,32 +99,50 @@ var g_trace_idx int;
 var g_stack = make([](big.Int), 0);
 var g_stack_idx int;
 
+/* This function is called by the fuzzer to retrieve the execution specifics
+   after a run.
+*/
 //export getTrace
 func getTrace(finished *int, address *uint64, opcode *uint64, gas *uint64 ) {
     if g_trace_idx >= len(g_addresses) {
+        /* Reset to 0 so getTrace may be called again */
+        g_trace_idx = 0
+
+        /* Signal to the fuzzer that it has retrieved all trace items */
         *finished = 1
         return
     }
+
     *address = g_addresses[g_trace_idx]
     *opcode = g_opcodes[g_trace_idx]
-    *gas= g_gases[g_trace_idx]
+    *gas = g_gases[g_trace_idx]
+
     *finished = 0
     g_trace_idx++
 }
 
+/* This function is called by the fuzzer to retrieve the final stack state
+   after a run
+*/
 //export getStack
 func getStack(finished *int, stackitem []byte) {
     if g_stack_idx >= len(g_stack) {
+        /* Reset to 0 so getStack may be called again */
         g_stack_idx = 0
+
+        /* Signal to the fuzzer that it has retrieved all stack items */
         *finished = 1
         return
     }
 
+    /* Prevent a buffer overwrite */
     stackitem_len := len(g_stack[g_stack_idx].Bytes())
     if stackitem_len > 32 {
         panic("stackitem too long")
     }
+
     copy(stackitem, g_stack[g_stack_idx].Bytes())
+
     *finished = 0
     g_stack_idx++
 }
@@ -153,12 +171,17 @@ func runVM(
 	sdb := state.NewDatabase(db)
 	statedb, _ := state.New(common.Hash{}, sdb)
 
+    /* Helper functions required for correct functioning of the VM */
 	canTransfer := func(db vm.StateDB, address common.Address, amount *big.Int) bool {
         return db.GetBalance(address).Cmp(amount) >= 0
 	}
     transfer := func(db vm.StateDB, sender, recipient common.Address, amount *big.Int) {
         db.SubBalance(sender, amount)
         db.AddBalance(recipient, amount)
+    }
+    vmTestBlockHash := func(n uint64) common.Hash {
+        i := new(big.Int).SetUint64(123)
+        return common.BigToHash(i)
     }
 
 	context := vm.Context{
@@ -172,12 +195,15 @@ func runVM(
 		Difficulty:   new(big.Int).SetUint64(difficulty),
 		GasPrice:   new(big.Int).SetUint64(gasprice),
 	}
+
     tracer := vm.NewStructLogger(nil)
     env := vm.NewEVM(context, statedb, params.MainnetChainConfig, vm.Config{Debug: true, Tracer: tracer})
 	contract := vm.NewContract(account{}, account{}, big.NewInt(0), gas)
 	contract.Code = input
 
+    /* Execute the byte code */
     _, err := env.Interpreter().Run(0, contract, []byte{})
+
     if err == nil {
         *success = 1
     } else {
@@ -190,8 +216,14 @@ func runVM(
     logs := tracer.StructLogs()
     i := 0
     loglen := len(logs)
+    /* This loop stores the variables address, opcode, gas at every step
+       of the execution as well as the final stack state, for later
+       retrieval by the fuzzer.
+    */
     for _, t := range logs {
         i++
+
+        /* Set g_stack to the final stack state */
         if i == loglen {
             for _, t2 := range t.Stack {
                 g_stack = append(g_stack, *t2)
@@ -203,6 +235,9 @@ func runVM(
         g_gases = append(g_gases, t.Gas)
     }
 
+    /* Print address, opcode, gas at every step of the execution
+       if the fuzzer is run with --trace
+    */
     if do_trace != 0 {
         execution_num := 1
         for _, t := range logs {
@@ -211,22 +246,9 @@ func runVM(
             fmt.Printf("Gas: %v\n", t.Gas)
 
             execution_num++;
-            /*
-            fmt.Printf("Op: %v\n", t.Op)
-            fmt.Printf("Gas: %v\n", t.Gas)
-            fmt.Printf("GasCost: %v\n", t.GasCost)
-            fmt.Printf("Depth: %v\n", t.Depth)
-            fmt.Printf("Stack: %v\n", t.Stack)
-            fmt.Printf("Storage: %v\n", t.Storage)
-            fmt.Printf("\n")
-            */
         }
     }
 }
 
-func vmTestBlockHash(n uint64) common.Hash {
-    i := new(big.Int).SetUint64(123)
-    return common.BigToHash(i)
-}
-
+/* No main() body because this file is compiled to a static archive */
 func main() { }
