@@ -16,6 +16,9 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 )
 
+var covered = make([]int, fuzz_helper.CoverSize)
+var coverage_cached int;
+
 //export GoResetCoverage
 func GoResetCoverage() {
     for i := 0; i < fuzz_helper.CoverSize; i++ {
@@ -25,15 +28,24 @@ func GoResetCoverage() {
 
 //export GoCalcCoverage
 func GoCalcCoverage() int {
-    coverage := 0
+    new_coverage := 0
 
     for i := 0; i < fuzz_helper.CoverSize; i++ {
-        if fuzz_helper.CoverTab[i] != 0 {
-            coverage += 1
+        if covered[i] == 0 && fuzz_helper.CoverTab[i] != 0 {
+                new_coverage += 1
+                covered[i] = 1
         }
-	}
+    }
 
-    return coverage
+    /* For the sake of speed, only calculate new coverage if at least 1
+       new branch was accessed
+    */
+    if new_coverage > 0 {
+        coverage_cached += new_coverage
+    }
+
+    /* At this point, coverage_cached always reflects the current coverage */
+    return coverage_cached
 }
 
 type account struct{}
