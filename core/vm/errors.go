@@ -12,4 +12,4 @@ var (
 	ErrInsufficientBalance      = errors.New("insufficient balance for transfer")
 	ErrContractAddressCollision = errors.New("contract address collision")
 )
-var _ = fuzz_helper.CoverTab
+var _ = fuzz_helper.AddCoverage

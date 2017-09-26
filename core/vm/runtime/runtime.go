@@ -1,20 +1,6 @@
-// Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
 package runtime
+
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"math"
@@ -51,7 +37,9 @@ type Config struct {
 
 // sets defaults on the config
 func setDefaults(cfg *Config) {
+	fuzz_helper.AddCoverage(22588)
 	if cfg.ChainConfig == nil {
+		fuzz_helper.AddCoverage(45213)
 		cfg.ChainConfig = &params.ChainConfig{
 			ChainId:        big.NewInt(1),
 			HomesteadBlock: new(big.Int),
@@ -61,30 +49,61 @@ func setDefaults(cfg *Config) {
 			EIP155Block:    new(big.Int),
 			EIP158Block:    new(big.Int),
 		}
+	} else {
+		fuzz_helper.AddCoverage(16619)
 	}
+	fuzz_helper.AddCoverage(44810)
 
 	if cfg.Difficulty == nil {
+		fuzz_helper.AddCoverage(12692)
 		cfg.Difficulty = new(big.Int)
+	} else {
+		fuzz_helper.AddCoverage(42483)
 	}
+	fuzz_helper.AddCoverage(5262)
 	if cfg.Time == nil {
+		fuzz_helper.AddCoverage(6577)
 		cfg.Time = big.NewInt(time.Now().Unix())
+	} else {
+		fuzz_helper.AddCoverage(17393)
 	}
+	fuzz_helper.AddCoverage(17878)
 	if cfg.GasLimit == 0 {
+		fuzz_helper.AddCoverage(64174)
 		cfg.GasLimit = math.MaxUint64
+	} else {
+		fuzz_helper.AddCoverage(38740)
 	}
+	fuzz_helper.AddCoverage(45021)
 	if cfg.GasPrice == nil {
+		fuzz_helper.AddCoverage(35657)
 		cfg.GasPrice = new(big.Int)
+	} else {
+		fuzz_helper.AddCoverage(30358)
 	}
+	fuzz_helper.AddCoverage(39040)
 	if cfg.Value == nil {
+		fuzz_helper.AddCoverage(23294)
 		cfg.Value = new(big.Int)
+	} else {
+		fuzz_helper.AddCoverage(61639)
 	}
+	fuzz_helper.AddCoverage(2095)
 	if cfg.BlockNumber == nil {
+		fuzz_helper.AddCoverage(11162)
 		cfg.BlockNumber = new(big.Int)
+	} else {
+		fuzz_helper.AddCoverage(49217)
 	}
+	fuzz_helper.AddCoverage(21668)
 	if cfg.GetHashFn == nil {
+		fuzz_helper.AddCoverage(34511)
 		cfg.GetHashFn = func(n uint64) common.Hash {
+			fuzz_helper.AddCoverage(64074)
 			return common.BytesToHash(crypto.Keccak256([]byte(new(big.Int).SetUint64(n).String())))
 		}
+	} else {
+		fuzz_helper.AddCoverage(28614)
 	}
 }
 
@@ -95,24 +114,33 @@ func setDefaults(cfg *Config) {
 // the given code. It enabled the JIT by default and make sure that it's restored
 // to it's original state afterwards.
 func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
+	fuzz_helper.AddCoverage(39226)
 	if cfg == nil {
+		fuzz_helper.AddCoverage(52877)
 		cfg = new(Config)
+	} else {
+		fuzz_helper.AddCoverage(778)
 	}
+	fuzz_helper.AddCoverage(2297)
 	setDefaults(cfg)
 
 	if cfg.State == nil {
+		fuzz_helper.AddCoverage(33340)
 		db, _ := ethdb.NewMemDatabase()
 		cfg.State, _ = state.New(common.Hash{}, state.NewDatabase(db))
+	} else {
+		fuzz_helper.AddCoverage(15638)
 	}
+	fuzz_helper.AddCoverage(40870)
 	var (
 		address = common.StringToAddress("contract")
 		vmenv   = NewEnv(cfg)
 		sender  = vm.AccountRef(cfg.Origin)
 	)
 	cfg.State.CreateAccount(address)
-	// set the receiver's (the executing contract) code for execution.
+
 	cfg.State.SetCode(address, code)
-	// Call the code with the given configuration.
+
 	ret, _, err := vmenv.Call(
 		sender,
 		common.StringToAddress("contract"),
@@ -126,21 +154,29 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 
 // Create executes the code using the EVM create method
 func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
+	fuzz_helper.AddCoverage(45869)
 	if cfg == nil {
+		fuzz_helper.AddCoverage(12499)
 		cfg = new(Config)
+	} else {
+		fuzz_helper.AddCoverage(42993)
 	}
+	fuzz_helper.AddCoverage(23368)
 	setDefaults(cfg)
 
 	if cfg.State == nil {
+		fuzz_helper.AddCoverage(30301)
 		db, _ := ethdb.NewMemDatabase()
 		cfg.State, _ = state.New(common.Hash{}, state.NewDatabase(db))
+	} else {
+		fuzz_helper.AddCoverage(45210)
 	}
+	fuzz_helper.AddCoverage(12901)
 	var (
 		vmenv  = NewEnv(cfg)
 		sender = vm.AccountRef(cfg.Origin)
 	)
 
-	// Call the code with the given configuration.
 	code, address, leftOverGas, err := vmenv.Create(
 		sender,
 		input,
@@ -156,12 +192,13 @@ func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
 // Call, unlike Execute, requires a config and also requires the State field to
 // be set.
 func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, error) {
+	fuzz_helper.AddCoverage(264)
 	setDefaults(cfg)
 
 	vmenv := NewEnv(cfg)
 
 	sender := cfg.State.GetOrNewStateObject(cfg.Origin)
-	// Call the code with the given configuration.
+
 	ret, leftOverGas, err := vmenv.Call(
 		sender,
 		address,
@@ -172,3 +209,5 @@ func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, er
 
 	return ret, leftOverGas, err
 }
+
+var _ = fuzz_helper.AddCoverage

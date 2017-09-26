@@ -24,7 +24,7 @@ type AccountRef common.Address
 
 // Address casts AccountRef to a Address
 func (ar AccountRef) Address() common.Address {
-	fuzz_helper.CoverTab[22588]++
+	fuzz_helper.AddCoverage(22588)
 	return (common.Address)(ar)
 }
 
@@ -55,18 +55,18 @@ type Contract struct {
 
 // NewContract returns a new contract environment for the execution of EVM.
 func NewContract(caller ContractRef, object ContractRef, value *big.Int, gas uint64) *Contract {
-	fuzz_helper.CoverTab[44810]++
+	fuzz_helper.AddCoverage(44810)
 	c := &Contract{CallerAddress: caller.Address(), caller: caller, self: object, Args: nil}
 
 	if parent, ok := caller.(*Contract); ok {
-		fuzz_helper.CoverTab[17878]++
+		fuzz_helper.AddCoverage(17878)
 
 		c.jumpdests = parent.jumpdests
 	} else {
-		fuzz_helper.CoverTab[45021]++
+		fuzz_helper.AddCoverage(45021)
 		c.jumpdests = make(destinations)
 	}
-	fuzz_helper.CoverTab[5262]++
+	fuzz_helper.AddCoverage(5262)
 
 	c.Gas = gas
 
@@ -78,7 +78,7 @@ func NewContract(caller ContractRef, object ContractRef, value *big.Int, gas uin
 // AsDelegate sets the contract to be a delegate call and returns the current
 // contract (for chaining calls)
 func (c *Contract) AsDelegate() *Contract {
-	fuzz_helper.CoverTab[39040]++
+	fuzz_helper.AddCoverage(39040)
 	c.DelegateCall = true
 
 	parent := c.caller.(*Contract)
@@ -90,20 +90,20 @@ func (c *Contract) AsDelegate() *Contract {
 
 // GetOp returns the n'th element in the contract's byte array
 func (c *Contract) GetOp(n uint64) OpCode {
-	fuzz_helper.CoverTab[2095]++
+	fuzz_helper.AddCoverage(2095)
 	return OpCode(c.GetByte(n))
 }
 
 // GetByte returns the n'th byte in the contract's byte array
 func (c *Contract) GetByte(n uint64) byte {
-	fuzz_helper.CoverTab[21668]++
+	fuzz_helper.AddCoverage(21668)
 	if n < uint64(len(c.Code)) {
-		fuzz_helper.CoverTab[16619]++
+		fuzz_helper.AddCoverage(16619)
 		return c.Code[n]
 	} else {
-		fuzz_helper.CoverTab[12692]++
+		fuzz_helper.AddCoverage(12692)
 	}
-	fuzz_helper.CoverTab[45213]++
+	fuzz_helper.AddCoverage(45213)
 
 	return 0
 }
@@ -113,39 +113,39 @@ func (c *Contract) GetByte(n uint64) byte {
 // Caller will recursively call caller when the contract is a delegate
 // call, including that of caller's caller.
 func (c *Contract) Caller() common.Address {
-	fuzz_helper.CoverTab[42483]++
+	fuzz_helper.AddCoverage(42483)
 	return c.CallerAddress
 }
 
 // UseGas attempts the use gas and subtracts it and returns true on success
 func (c *Contract) UseGas(gas uint64) (ok bool) {
-	fuzz_helper.CoverTab[6577]++
+	fuzz_helper.AddCoverage(6577)
 	if c.Gas < gas {
-		fuzz_helper.CoverTab[64174]++
+		fuzz_helper.AddCoverage(64174)
 		return false
 	} else {
-		fuzz_helper.CoverTab[38740]++
+		fuzz_helper.AddCoverage(38740)
 	}
-	fuzz_helper.CoverTab[17393]++
+	fuzz_helper.AddCoverage(17393)
 	c.Gas -= gas
 	return true
 }
 
 // Address returns the contracts address
 func (c *Contract) Address() common.Address {
-	fuzz_helper.CoverTab[35657]++
+	fuzz_helper.AddCoverage(35657)
 	return c.self.Address()
 }
 
 // Value returns the contracts value (sent to it from it's caller)
 func (c *Contract) Value() *big.Int {
-	fuzz_helper.CoverTab[30358]++
+	fuzz_helper.AddCoverage(30358)
 	return c.value
 }
 
 // SetCode sets the code to the contract
 func (self *Contract) SetCode(hash common.Hash, code []byte) {
-	fuzz_helper.CoverTab[23294]++
+	fuzz_helper.AddCoverage(23294)
 	self.Code = code
 	self.CodeHash = hash
 }
@@ -153,10 +153,10 @@ func (self *Contract) SetCode(hash common.Hash, code []byte) {
 // SetCallCode sets the code of the contract and address of the backing data
 // object
 func (self *Contract) SetCallCode(addr *common.Address, hash common.Hash, code []byte) {
-	fuzz_helper.CoverTab[61639]++
+	fuzz_helper.AddCoverage(61639)
 	self.Code = code
 	self.CodeHash = hash
 	self.CodeAddr = addr
 }
 
-var _ = fuzz_helper.CoverTab
+var _ = fuzz_helper.AddCoverage

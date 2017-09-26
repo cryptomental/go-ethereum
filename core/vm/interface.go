@@ -63,4 +63,4 @@ type CallContext interface {
 	Create(env *EVM, me ContractRef, data []byte, gas, value *big.Int) ([]byte, common.Address, error)
 }
 
-var _ = fuzz_helper.CoverTab
+var _ = fuzz_helper.AddCoverage

@@ -15,44 +15,44 @@ type intPool struct {
 }
 
 func newIntPool() *intPool {
-	fuzz_helper.CoverTab[22588]++
+	fuzz_helper.AddCoverage(22588)
 	return &intPool{pool: newstack()}
 }
 
 func (p *intPool) get() *big.Int {
-	fuzz_helper.CoverTab[44810]++
+	fuzz_helper.AddCoverage(44810)
 	if p.pool.len() > 0 {
-		fuzz_helper.CoverTab[17878]++
+		fuzz_helper.AddCoverage(17878)
 		return p.pool.pop()
 	} else {
-		fuzz_helper.CoverTab[45021]++
+		fuzz_helper.AddCoverage(45021)
 	}
-	fuzz_helper.CoverTab[5262]++
+	fuzz_helper.AddCoverage(5262)
 	return new(big.Int)
 }
 func (p *intPool) put(is ...*big.Int) {
-	fuzz_helper.CoverTab[39040]++
+	fuzz_helper.AddCoverage(39040)
 	if len(p.pool.data) > poolLimit {
-		fuzz_helper.CoverTab[21668]++
+		fuzz_helper.AddCoverage(21668)
 		return
 	} else {
-		fuzz_helper.CoverTab[45213]++
+		fuzz_helper.AddCoverage(45213)
 	}
-	fuzz_helper.CoverTab[2095]++
+	fuzz_helper.AddCoverage(2095)
 
 	for _, i := range is {
-		fuzz_helper.CoverTab[16619]++
+		fuzz_helper.AddCoverage(16619)
 
 		if verifyPool {
-			fuzz_helper.CoverTab[42483]++
+			fuzz_helper.AddCoverage(42483)
 			i.Set(checkVal)
 		} else {
-			fuzz_helper.CoverTab[6577]++
+			fuzz_helper.AddCoverage(6577)
 		}
-		fuzz_helper.CoverTab[12692]++
+		fuzz_helper.AddCoverage(12692)
 
 		p.pool.push(i)
 	}
 }
 
-var _ = fuzz_helper.CoverTab
+var _ = fuzz_helper.AddCoverage

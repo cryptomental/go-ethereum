@@ -1,36 +1,26 @@
-// Copyright 2017 The go-ethereum Authors
-// This file is part of the go-ethereum library.
-//
-// The go-ethereum library is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// The go-ethereum library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
-
-// +build gofuzz
-
 package runtime
+
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 // Fuzz is the basic entry point for the go-fuzz tool
 //
 // This returns 1 for valid parsable/runable code, 0
 // for invalid opcode.
 func Fuzz(input []byte) int {
+	fuzz_helper.AddCoverage(22588)
 	_, _, err := Execute(input, input, &Config{
 		GasLimit: 3000000,
 	})
 
-	// invalid opcode
 	if err != nil && len(err.Error()) > 6 && string(err.Error()[:7]) == "invalid" {
+		fuzz_helper.AddCoverage(5262)
 		return 0
+	} else {
+		fuzz_helper.AddCoverage(17878)
 	}
+	fuzz_helper.AddCoverage(44810)
 
 	return 1
 }
+
+var _ = fuzz_helper.AddCoverage

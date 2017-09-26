@@ -10,20 +10,20 @@ import (
 type OpCode byte
 
 func (op OpCode) IsPush() bool {
-	fuzz_helper.CoverTab[22588]++
+	fuzz_helper.AddCoverage(22588)
 	switch op {
 	case PUSH1, PUSH2, PUSH3, PUSH4, PUSH5, PUSH6, PUSH7, PUSH8, PUSH9, PUSH10, PUSH11, PUSH12, PUSH13, PUSH14, PUSH15, PUSH16, PUSH17, PUSH18, PUSH19, PUSH20, PUSH21, PUSH22, PUSH23, PUSH24, PUSH25, PUSH26, PUSH27, PUSH28, PUSH29, PUSH30, PUSH31, PUSH32:
-		fuzz_helper.CoverTab[5262]++
+		fuzz_helper.AddCoverage(5262)
 		return true
 	default:
-		fuzz_helper.CoverTab[17878]++
+		fuzz_helper.AddCoverage(17878)
 	}
-	fuzz_helper.CoverTab[44810]++
+	fuzz_helper.AddCoverage(44810)
 	return false
 }
 
 func (op OpCode) IsStaticJump() bool {
-	fuzz_helper.CoverTab[45021]++
+	fuzz_helper.AddCoverage(45021)
 	return op == JUMP
 }
 
@@ -354,15 +354,15 @@ var opCodeToString = map[OpCode]string{
 }
 
 func (o OpCode) String() string {
-	fuzz_helper.CoverTab[39040]++
+	fuzz_helper.AddCoverage(39040)
 	str := opCodeToString[o]
 	if len(str) == 0 {
-		fuzz_helper.CoverTab[21668]++
+		fuzz_helper.AddCoverage(21668)
 		return fmt.Sprintf("Missing opcode 0x%x", int(o))
 	} else {
-		fuzz_helper.CoverTab[45213]++
+		fuzz_helper.AddCoverage(45213)
 	}
-	fuzz_helper.CoverTab[2095]++
+	fuzz_helper.AddCoverage(2095)
 
 	return str
 }
@@ -505,8 +505,8 @@ var stringToOp = map[string]OpCode{
 }
 
 func StringToOp(str string) OpCode {
-	fuzz_helper.CoverTab[16619]++
+	fuzz_helper.AddCoverage(16619)
 	return stringToOp[str]
 }
 
-var _ = fuzz_helper.CoverTab
+var _ = fuzz_helper.AddCoverage

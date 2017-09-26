@@ -323,37 +323,37 @@ var bn256PairingTests = []precompiledTest{
 }
 
 func testPrecompiled(addr string, test precompiledTest, t *testing.T) {
-	fuzz_helper.CoverTab[22588]++
+	fuzz_helper.AddCoverage(22588)
 	p := PrecompiledContractsByzantium[common.HexToAddress(addr)]
 	in := common.Hex2Bytes(test.input)
 	contract := NewContract(AccountRef(common.HexToAddress("1337")),
 		nil, new(big.Int), p.RequiredGas(in))
 	t.Run(fmt.Sprintf("%s-Gas=%d", test.name, contract.Gas), func(t *testing.T) {
-		fuzz_helper.CoverTab[44810]++
+		fuzz_helper.AddCoverage(44810)
 		if res, err := RunPrecompiledContract(p, in, contract); err != nil {
-			fuzz_helper.CoverTab[5262]++
+			fuzz_helper.AddCoverage(5262)
 			t.Error(err)
 		} else {
-			fuzz_helper.CoverTab[17878]++
+			fuzz_helper.AddCoverage(17878)
 			if common.Bytes2Hex(res) != test.expected {
-				fuzz_helper.CoverTab[45021]++
+				fuzz_helper.AddCoverage(45021)
 				t.Errorf("Expected %v, got %v", test.expected, common.Bytes2Hex(res))
 			} else {
-				fuzz_helper.CoverTab[39040]++
+				fuzz_helper.AddCoverage(39040)
 			}
 		}
 	})
 }
 
 func benchmarkPrecompiled(addr string, test precompiledTest, bench *testing.B) {
-	fuzz_helper.CoverTab[2095]++
+	fuzz_helper.AddCoverage(2095)
 	if test.noBenchmark {
-		fuzz_helper.CoverTab[45213]++
+		fuzz_helper.AddCoverage(45213)
 		return
 	} else {
-		fuzz_helper.CoverTab[16619]++
+		fuzz_helper.AddCoverage(16619)
 	}
-	fuzz_helper.CoverTab[21668]++
+	fuzz_helper.AddCoverage(21668)
 	p := PrecompiledContractsByzantium[common.HexToAddress(addr)]
 	in := common.Hex2Bytes(test.input)
 	reqGas := p.RequiredGas(in)
@@ -367,38 +367,38 @@ func benchmarkPrecompiled(addr string, test precompiledTest, bench *testing.B) {
 	)
 
 	bench.Run(fmt.Sprintf("%s-Gas=%d", test.name, contract.Gas), func(bench *testing.B) {
-		fuzz_helper.CoverTab[12692]++
+		fuzz_helper.AddCoverage(12692)
 		bench.ResetTimer()
 		for i := 0; i < bench.N; i++ {
-			fuzz_helper.CoverTab[17393]++
+			fuzz_helper.AddCoverage(17393)
 			contract.Gas = reqGas
 			copy(data, in)
 			res, err = RunPrecompiledContract(p, data, contract)
 		}
-		fuzz_helper.CoverTab[42483]++
+		fuzz_helper.AddCoverage(42483)
 		bench.StopTimer()
 
 		if err != nil {
-			fuzz_helper.CoverTab[64174]++
+			fuzz_helper.AddCoverage(64174)
 			bench.Error(err)
 			return
 		} else {
-			fuzz_helper.CoverTab[38740]++
+			fuzz_helper.AddCoverage(38740)
 		}
-		fuzz_helper.CoverTab[6577]++
+		fuzz_helper.AddCoverage(6577)
 		if common.Bytes2Hex(res) != test.expected {
-			fuzz_helper.CoverTab[35657]++
+			fuzz_helper.AddCoverage(35657)
 			bench.Error(fmt.Sprintf("Expected %v, got %v", test.expected, common.Bytes2Hex(res)))
 			return
 		} else {
-			fuzz_helper.CoverTab[30358]++
+			fuzz_helper.AddCoverage(30358)
 		}
 	})
 }
 
 // Benchmarks the sample inputs from the ECRECOVER precompile.
 func BenchmarkPrecompiledEcrecover(bench *testing.B) {
-	fuzz_helper.CoverTab[23294]++
+	fuzz_helper.AddCoverage(23294)
 	t := precompiledTest{
 		input:    "38d18acb67d25c8bb9942764b62f18e17054f66a817bd4295423adf9ed98873e000000000000000000000000000000000000000000000000000000000000001b38d18acb67d25c8bb9942764b62f18e17054f66a817bd4295423adf9ed98873e789d1dd423d25f0772d2748d60f7e4b81bb14d086eba8e8e8efb6dcff8a4ae02",
 		expected: "000000000000000000000000ceaccac640adf55b2028469bd36ba501f28b699d",
@@ -409,7 +409,7 @@ func BenchmarkPrecompiledEcrecover(bench *testing.B) {
 
 // Benchmarks the sample inputs from the SHA256 precompile.
 func BenchmarkPrecompiledSha256(bench *testing.B) {
-	fuzz_helper.CoverTab[61639]++
+	fuzz_helper.AddCoverage(61639)
 	t := precompiledTest{
 		input:    "38d18acb67d25c8bb9942764b62f18e17054f66a817bd4295423adf9ed98873e000000000000000000000000000000000000000000000000000000000000001b38d18acb67d25c8bb9942764b62f18e17054f66a817bd4295423adf9ed98873e789d1dd423d25f0772d2748d60f7e4b81bb14d086eba8e8e8efb6dcff8a4ae02",
 		expected: "811c7003375852fabd0d362e40e68607a12bdabae61a7d068fe5fdd1dbbf2a5d",
@@ -420,7 +420,7 @@ func BenchmarkPrecompiledSha256(bench *testing.B) {
 
 // Benchmarks the sample inputs from the RIPEMD precompile.
 func BenchmarkPrecompiledRipeMD(bench *testing.B) {
-	fuzz_helper.CoverTab[11162]++
+	fuzz_helper.AddCoverage(11162)
 	t := precompiledTest{
 		input:    "38d18acb67d25c8bb9942764b62f18e17054f66a817bd4295423adf9ed98873e000000000000000000000000000000000000000000000000000000000000001b38d18acb67d25c8bb9942764b62f18e17054f66a817bd4295423adf9ed98873e789d1dd423d25f0772d2748d60f7e4b81bb14d086eba8e8e8efb6dcff8a4ae02",
 		expected: "0000000000000000000000009215b8d9882ff46f0dfde6684d78e831467f65e6",
@@ -431,7 +431,7 @@ func BenchmarkPrecompiledRipeMD(bench *testing.B) {
 
 // Benchmarks the sample inputs from the identiy precompile.
 func BenchmarkPrecompiledIdentity(bench *testing.B) {
-	fuzz_helper.CoverTab[49217]++
+	fuzz_helper.AddCoverage(49217)
 	t := precompiledTest{
 		input:    "38d18acb67d25c8bb9942764b62f18e17054f66a817bd4295423adf9ed98873e000000000000000000000000000000000000000000000000000000000000001b38d18acb67d25c8bb9942764b62f18e17054f66a817bd4295423adf9ed98873e789d1dd423d25f0772d2748d60f7e4b81bb14d086eba8e8e8efb6dcff8a4ae02",
 		expected: "38d18acb67d25c8bb9942764b62f18e17054f66a817bd4295423adf9ed98873e000000000000000000000000000000000000000000000000000000000000001b38d18acb67d25c8bb9942764b62f18e17054f66a817bd4295423adf9ed98873e789d1dd423d25f0772d2748d60f7e4b81bb14d086eba8e8e8efb6dcff8a4ae02",
@@ -442,74 +442,74 @@ func BenchmarkPrecompiledIdentity(bench *testing.B) {
 
 // Tests the sample inputs from the ModExp EIP 198.
 func TestPrecompiledModExp(t *testing.T) {
-	fuzz_helper.CoverTab[34511]++
+	fuzz_helper.AddCoverage(34511)
 	for _, test := range modexpTests {
-		fuzz_helper.CoverTab[64074]++
+		fuzz_helper.AddCoverage(64074)
 		testPrecompiled("05", test, t)
 	}
 }
 
 // Benchmarks the sample inputs from the ModExp EIP 198.
 func BenchmarkPrecompiledModExp(bench *testing.B) {
-	fuzz_helper.CoverTab[28614]++
+	fuzz_helper.AddCoverage(28614)
 	for _, test := range modexpTests {
-		fuzz_helper.CoverTab[39226]++
+		fuzz_helper.AddCoverage(39226)
 		benchmarkPrecompiled("05", test, bench)
 	}
 }
 
 // Tests the sample inputs from the elliptic curve addition EIP 213.
 func TestPrecompiledBn256Add(t *testing.T) {
-	fuzz_helper.CoverTab[2297]++
+	fuzz_helper.AddCoverage(2297)
 	for _, test := range bn256AddTests {
-		fuzz_helper.CoverTab[40870]++
+		fuzz_helper.AddCoverage(40870)
 		testPrecompiled("06", test, t)
 	}
 }
 
 // Benchmarks the sample inputs from the elliptic curve addition EIP 213.
 func BenchmarkPrecompiledBn256Add(bench *testing.B) {
-	fuzz_helper.CoverTab[52877]++
+	fuzz_helper.AddCoverage(52877)
 	for _, test := range bn256AddTests {
-		fuzz_helper.CoverTab[778]++
+		fuzz_helper.AddCoverage(778)
 		benchmarkPrecompiled("06", test, bench)
 	}
 }
 
 // Tests the sample inputs from the elliptic curve scalar multiplication EIP 213.
 func TestPrecompiledBn256ScalarMul(t *testing.T) {
-	fuzz_helper.CoverTab[33340]++
+	fuzz_helper.AddCoverage(33340)
 	for _, test := range bn256ScalarMulTests {
-		fuzz_helper.CoverTab[15638]++
+		fuzz_helper.AddCoverage(15638)
 		testPrecompiled("07", test, t)
 	}
 }
 
 // Benchmarks the sample inputs from the elliptic curve scalar multiplication EIP 213.
 func BenchmarkPrecompiledBn256ScalarMul(bench *testing.B) {
-	fuzz_helper.CoverTab[45869]++
+	fuzz_helper.AddCoverage(45869)
 	for _, test := range bn256ScalarMulTests {
-		fuzz_helper.CoverTab[23368]++
+		fuzz_helper.AddCoverage(23368)
 		benchmarkPrecompiled("07", test, bench)
 	}
 }
 
 // Tests the sample inputs from the elliptic curve pairing check EIP 197.
 func TestPrecompiledBn256Pairing(t *testing.T) {
-	fuzz_helper.CoverTab[12901]++
+	fuzz_helper.AddCoverage(12901)
 	for _, test := range bn256PairingTests {
-		fuzz_helper.CoverTab[12499]++
+		fuzz_helper.AddCoverage(12499)
 		testPrecompiled("08", test, t)
 	}
 }
 
 // Behcnmarks the sample inputs from the elliptic curve pairing check EIP 197.
 func BenchmarkPrecompiledBn256Pairing(bench *testing.B) {
-	fuzz_helper.CoverTab[42993]++
+	fuzz_helper.AddCoverage(42993)
 	for _, test := range bn256PairingTests {
-		fuzz_helper.CoverTab[30301]++
+		fuzz_helper.AddCoverage(30301)
 		benchmarkPrecompiled("08", test, bench)
 	}
 }
 
-var _ = fuzz_helper.CoverTab
+var _ = fuzz_helper.AddCoverage
