@@ -8,7 +8,7 @@
 #define _SECP256K1_UTIL_H_
 
 #if defined HAVE_CONFIG_H
-#include "libsecp256k1-config.h"
+#include "libxsecp256k1-config.h"
 #endif
 
 #include <stdlib.h>
@@ -18,9 +18,9 @@
 typedef struct {
     void (*fn)(const char *text, void* data);
     const void* data;
-} secp256k1_callback;
+} xsecp256k1_callback;
 
-static SECP256K1_INLINE void secp256k1_callback_call(const secp256k1_callback * const cb, const char * const text) {
+static SECP256K1_INLINE void xsecp256k1_callback_call(const xsecp256k1_callback * const cb, const char * const text) {
     cb->fn(text, (void*)cb->data);
 }
 
@@ -68,10 +68,10 @@ static SECP256K1_INLINE void secp256k1_callback_call(const secp256k1_callback * 
 #define VERIFY_SETUP(stmt)
 #endif
 
-static SECP256K1_INLINE void *checked_malloc(const secp256k1_callback* cb, size_t size) {
+static SECP256K1_INLINE void *checked_malloc(const xsecp256k1_callback* cb, size_t size) {
     void *ret = malloc(size);
     if (ret == NULL) {
-        secp256k1_callback_call(cb, "Out of memory");
+        xsecp256k1_callback_call(cb, "Out of memory");
     }
     return ret;
 }

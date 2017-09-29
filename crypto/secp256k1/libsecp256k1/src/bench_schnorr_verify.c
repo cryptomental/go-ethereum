@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "include/secp256k1.h"
-#include "include/secp256k1_schnorr.h"
+#include "include/xsecp256k1.h"
+#include "include/xsecp256k1_schnorr.h"
 #include "util.h"
 #include "bench.h"
 
@@ -20,7 +20,7 @@ typedef struct {
 } benchmark_schnorr_sig_t;
 
 typedef struct {
-    secp256k1_context *ctx;
+    xsecp256k1_context *ctx;
     unsigned char msg[32];
     benchmark_schnorr_sig_t sigs[64];
     int numsigs;
@@ -34,14 +34,14 @@ static void benchmark_schnorr_init(void* arg) {
         data->msg[i] = 1 + i;
     }
     for (k = 0; k < data->numsigs; k++) {
-        secp256k1_pubkey pubkey;
+        xsecp256k1_pubkey pubkey;
         for (i = 0; i < 32; i++) {
             data->sigs[k].key[i] = 33 + i + k;
         }
-        secp256k1_schnorr_sign(data->ctx, data->sigs[k].sig, data->msg, data->sigs[k].key, NULL, NULL);
+        xsecp256k1_schnorr_sign(data->ctx, data->sigs[k].sig, data->msg, data->sigs[k].key, NULL, NULL);
         data->sigs[k].pubkeylen = 33;
-        CHECK(secp256k1_ec_pubkey_create(data->ctx, &pubkey, data->sigs[k].key));
-        CHECK(secp256k1_ec_pubkey_serialize(data->ctx, data->sigs[k].pubkey, &data->sigs[k].pubkeylen, &pubkey, SECP256K1_EC_COMPRESSED));
+        CHECK(xsecp256k1_ec_pubkey_create(data->ctx, &pubkey, data->sigs[k].key));
+        CHECK(xsecp256k1_ec_pubkey_serialize(data->ctx, data->sigs[k].pubkey, &data->sigs[k].pubkeylen, &pubkey, SECP256K1_EC_COMPRESSED));
     }
 }
 
@@ -50,10 +50,10 @@ static void benchmark_schnorr_verify(void* arg) {
     benchmark_schnorr_verify_t* data = (benchmark_schnorr_verify_t*)arg;
 
     for (i = 0; i < 20000 / data->numsigs; i++) {
-        secp256k1_pubkey pubkey;
+        xsecp256k1_pubkey pubkey;
         data->sigs[0].sig[(i >> 8) % 64] ^= (i & 0xFF);
-        CHECK(secp256k1_ec_pubkey_parse(data->ctx, &pubkey, data->sigs[0].pubkey, data->sigs[0].pubkeylen));
-        CHECK(secp256k1_schnorr_verify(data->ctx, data->sigs[0].sig, data->msg, &pubkey) == ((i & 0xFF) == 0));
+        CHECK(xsecp256k1_ec_pubkey_parse(data->ctx, &pubkey, data->sigs[0].pubkey, data->sigs[0].pubkeylen));
+        CHECK(xsecp256k1_schnorr_verify(data->ctx, data->sigs[0].sig, data->msg, &pubkey) == ((i & 0xFF) == 0));
         data->sigs[0].sig[(i >> 8) % 64] ^= (i & 0xFF);
     }
 }
@@ -63,11 +63,11 @@ static void benchmark_schnorr_verify(void* arg) {
 int main(void) {
     benchmark_schnorr_verify_t data;
 
-    data.ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
+    data.ctx = xsecp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
 
     data.numsigs = 1;
     run_benchmark("schnorr_verify", benchmark_schnorr_verify, benchmark_schnorr_init, NULL, &data, 10, 20000);
 
-    secp256k1_context_destroy(data.ctx);
+    xsecp256k1_context_destroy(data.ctx);
     return 0;
 }
