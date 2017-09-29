@@ -6,14 +6,14 @@
 
 #include <string.h>
 
-#include "include/secp256k1.h"
-#include "include/secp256k1_ecdh.h"
+#include "include/xsecp256k1.h"
+#include "include/xsecp256k1_ecdh.h"
 #include "util.h"
 #include "bench.h"
 
 typedef struct {
-    secp256k1_context *ctx;
-    secp256k1_pubkey point;
+    xsecp256k1_context *ctx;
+    xsecp256k1_pubkey point;
     unsigned char scalar[32];
 } bench_ecdh_t;
 
@@ -29,11 +29,11 @@ static void bench_ecdh_setup(void* arg) {
     };
 
     /* create a context with no capabilities */
-    data->ctx = secp256k1_context_create(SECP256K1_FLAGS_TYPE_CONTEXT);
+    data->ctx = xsecp256k1_context_create(SECP256K1_FLAGS_TYPE_CONTEXT);
     for (i = 0; i < 32; i++) {
         data->scalar[i] = i + 1;
     }
-    CHECK(secp256k1_ec_pubkey_parse(data->ctx, &data->point, point, sizeof(point)) == 1);
+    CHECK(xsecp256k1_ec_pubkey_parse(data->ctx, &data->point, point, sizeof(point)) == 1);
 }
 
 static void bench_ecdh(void* arg) {
@@ -42,7 +42,7 @@ static void bench_ecdh(void* arg) {
     bench_ecdh_t *data = (bench_ecdh_t*)arg;
 
     for (i = 0; i < 20000; i++) {
-        CHECK(secp256k1_ecdh(data->ctx, res, &data->point, data->scalar) == 1);
+        CHECK(xsecp256k1_ecdh(data->ctx, res, &data->point, data->scalar) == 1);
     }
 }
 
