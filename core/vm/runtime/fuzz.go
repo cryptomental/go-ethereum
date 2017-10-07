@@ -7,18 +7,20 @@ import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 // This returns 1 for valid parsable/runable code, 0
 // for invalid opcode.
 func Fuzz(input []byte) int {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(63359)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	_, _, err := Execute(input, input, &Config{
 		GasLimit: 3000000,
 	})
 
 	if err != nil && len(err.Error()) > 6 && string(err.Error()[:7]) == "invalid" {
-		fuzz_helper.AddCoverage(5262)
+		fuzz_helper.AddCoverage(63)
 		return 0
 	} else {
-		fuzz_helper.AddCoverage(17878)
+		fuzz_helper.AddCoverage(13937)
 	}
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(62421)
 
 	return 1
 }

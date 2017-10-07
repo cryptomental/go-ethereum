@@ -11,7 +11,9 @@ import (
 )
 
 func TestByteOp(t *testing.T) {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(21402)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	var (
 		env   = NewEVM(Context{}, nil, params.TestChainConfig, Config{EnableJit: false, ForceJit: false})
 		stack = newstack()
@@ -32,7 +34,7 @@ func TestByteOp(t *testing.T) {
 	}
 	pc := uint64(0)
 	for _, test := range tests {
-		fuzz_helper.AddCoverage(44810)
+		fuzz_helper.AddCoverage(42439)
 		val := new(big.Int).SetBytes(common.Hex2Bytes(test.v))
 		th := new(big.Int).SetUint64(test.th)
 		stack.push(val)
@@ -40,16 +42,18 @@ func TestByteOp(t *testing.T) {
 		opByte(&pc, env, nil, nil, stack)
 		actual := stack.pop()
 		if actual.Cmp(test.expected) != 0 {
-			fuzz_helper.AddCoverage(5262)
+			fuzz_helper.AddCoverage(9505)
 			t.Fatalf("Expected  [%v] %v:th byte to be %v, was %v.", test.v, test.th, test.expected, actual)
 		} else {
-			fuzz_helper.AddCoverage(17878)
+			fuzz_helper.AddCoverage(50669)
 		}
 	}
 }
 
 func opBenchmark(bench *testing.B, op func(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error), args ...string) {
-	fuzz_helper.AddCoverage(45021)
+	fuzz_helper.AddCoverage(8818)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	var (
 		env   = NewEVM(Context{}, nil, params.TestChainConfig, Config{EnableJit: false, ForceJit: false})
 		stack = newstack()
@@ -57,27 +61,29 @@ func opBenchmark(bench *testing.B, op func(pc *uint64, evm *EVM, contract *Contr
 
 	byteArgs := make([][]byte, len(args))
 	for i, arg := range args {
-		fuzz_helper.AddCoverage(2095)
+		fuzz_helper.AddCoverage(7658)
 		byteArgs[i] = common.Hex2Bytes(arg)
 	}
-	fuzz_helper.AddCoverage(39040)
+	fuzz_helper.AddCoverage(7644)
 	pc := uint64(0)
 	bench.ResetTimer()
 	for i := 0; i < bench.N; i++ {
-		fuzz_helper.AddCoverage(21668)
+		fuzz_helper.AddCoverage(28012)
 		for _, arg := range byteArgs {
-			fuzz_helper.AddCoverage(16619)
+			fuzz_helper.AddCoverage(57284)
 			a := new(big.Int).SetBytes(arg)
 			stack.push(a)
 		}
-		fuzz_helper.AddCoverage(45213)
+		fuzz_helper.AddCoverage(5559)
 		op(&pc, env, nil, nil, stack)
 		stack.pop()
 	}
 }
 
 func BenchmarkOpAdd64(b *testing.B) {
-	fuzz_helper.AddCoverage(12692)
+	fuzz_helper.AddCoverage(59440)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ffffffff"
 	y := "fd37f3e2bba2c4f"
 
@@ -85,7 +91,9 @@ func BenchmarkOpAdd64(b *testing.B) {
 }
 
 func BenchmarkOpAdd128(b *testing.B) {
-	fuzz_helper.AddCoverage(42483)
+	fuzz_helper.AddCoverage(8312)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ffffffffffffffff"
 	y := "f5470b43c6549b016288e9a65629687"
 
@@ -93,7 +101,9 @@ func BenchmarkOpAdd128(b *testing.B) {
 }
 
 func BenchmarkOpAdd256(b *testing.B) {
-	fuzz_helper.AddCoverage(6577)
+	fuzz_helper.AddCoverage(30333)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "0802431afcbce1fc194c9eaa417b2fb67dc75a95db0bc7ec6b1c8af11df6a1da9"
 	y := "a1f5aac137876480252e5dcac62c354ec0d42b76b0642b6181ed099849ea1d57"
 
@@ -101,7 +111,9 @@ func BenchmarkOpAdd256(b *testing.B) {
 }
 
 func BenchmarkOpSub64(b *testing.B) {
-	fuzz_helper.AddCoverage(17393)
+	fuzz_helper.AddCoverage(61307)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "51022b6317003a9d"
 	y := "a20456c62e00753a"
 
@@ -109,7 +121,9 @@ func BenchmarkOpSub64(b *testing.B) {
 }
 
 func BenchmarkOpSub128(b *testing.B) {
-	fuzz_helper.AddCoverage(64174)
+	fuzz_helper.AddCoverage(4167)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "4dde30faaacdc14d00327aac314e915d"
 	y := "9bbc61f5559b829a0064f558629d22ba"
 
@@ -117,7 +131,9 @@ func BenchmarkOpSub128(b *testing.B) {
 }
 
 func BenchmarkOpSub256(b *testing.B) {
-	fuzz_helper.AddCoverage(38740)
+	fuzz_helper.AddCoverage(1602)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "4bfcd8bb2ac462735b48a17580690283980aa2d679f091c64364594df113ea37"
 	y := "97f9b1765588c4e6b69142eb00d20507301545acf3e1238c86c8b29be227d46e"
 
@@ -125,7 +141,9 @@ func BenchmarkOpSub256(b *testing.B) {
 }
 
 func BenchmarkOpMul(b *testing.B) {
-	fuzz_helper.AddCoverage(35657)
+	fuzz_helper.AddCoverage(56128)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -133,28 +151,36 @@ func BenchmarkOpMul(b *testing.B) {
 }
 
 func BenchmarkOpDiv256(b *testing.B) {
-	fuzz_helper.AddCoverage(30358)
+	fuzz_helper.AddCoverage(28653)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ff3f9014f20db29ae04af2c2d265de17"
 	y := "fe7fb0d1f59dfe9492ffbf73683fd1e870eec79504c60144cc7f5fc2bad1e611"
 	opBenchmark(b, opDiv, x, y)
 }
 
 func BenchmarkOpDiv128(b *testing.B) {
-	fuzz_helper.AddCoverage(23294)
+	fuzz_helper.AddCoverage(41118)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "fdedc7f10142ff97"
 	y := "fbdfda0e2ce356173d1993d5f70a2b11"
 	opBenchmark(b, opDiv, x, y)
 }
 
 func BenchmarkOpDiv64(b *testing.B) {
-	fuzz_helper.AddCoverage(61639)
+	fuzz_helper.AddCoverage(9151)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "fcb34eb3"
 	y := "f97180878e839129"
 	opBenchmark(b, opDiv, x, y)
 }
 
 func BenchmarkOpSdiv(b *testing.B) {
-	fuzz_helper.AddCoverage(11162)
+	fuzz_helper.AddCoverage(59255)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ff3f9014f20db29ae04af2c2d265de17"
 	y := "fe7fb0d1f59dfe9492ffbf73683fd1e870eec79504c60144cc7f5fc2bad1e611"
 
@@ -162,7 +188,9 @@ func BenchmarkOpSdiv(b *testing.B) {
 }
 
 func BenchmarkOpMod(b *testing.B) {
-	fuzz_helper.AddCoverage(49217)
+	fuzz_helper.AddCoverage(4209)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -170,7 +198,9 @@ func BenchmarkOpMod(b *testing.B) {
 }
 
 func BenchmarkOpSmod(b *testing.B) {
-	fuzz_helper.AddCoverage(34511)
+	fuzz_helper.AddCoverage(16091)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -178,7 +208,9 @@ func BenchmarkOpSmod(b *testing.B) {
 }
 
 func BenchmarkOpExp(b *testing.B) {
-	fuzz_helper.AddCoverage(64074)
+	fuzz_helper.AddCoverage(7163)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -186,7 +218,9 @@ func BenchmarkOpExp(b *testing.B) {
 }
 
 func BenchmarkOpSignExtend(b *testing.B) {
-	fuzz_helper.AddCoverage(28614)
+	fuzz_helper.AddCoverage(33640)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -194,7 +228,9 @@ func BenchmarkOpSignExtend(b *testing.B) {
 }
 
 func BenchmarkOpLt(b *testing.B) {
-	fuzz_helper.AddCoverage(39226)
+	fuzz_helper.AddCoverage(48920)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -202,7 +238,9 @@ func BenchmarkOpLt(b *testing.B) {
 }
 
 func BenchmarkOpGt(b *testing.B) {
-	fuzz_helper.AddCoverage(2297)
+	fuzz_helper.AddCoverage(39497)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -210,7 +248,9 @@ func BenchmarkOpGt(b *testing.B) {
 }
 
 func BenchmarkOpSlt(b *testing.B) {
-	fuzz_helper.AddCoverage(40870)
+	fuzz_helper.AddCoverage(2405)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -218,7 +258,9 @@ func BenchmarkOpSlt(b *testing.B) {
 }
 
 func BenchmarkOpSgt(b *testing.B) {
-	fuzz_helper.AddCoverage(52877)
+	fuzz_helper.AddCoverage(1448)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -226,7 +268,9 @@ func BenchmarkOpSgt(b *testing.B) {
 }
 
 func BenchmarkOpEq(b *testing.B) {
-	fuzz_helper.AddCoverage(778)
+	fuzz_helper.AddCoverage(31247)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -234,7 +278,9 @@ func BenchmarkOpEq(b *testing.B) {
 }
 
 func BenchmarkOpAnd(b *testing.B) {
-	fuzz_helper.AddCoverage(33340)
+	fuzz_helper.AddCoverage(10799)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -242,7 +288,9 @@ func BenchmarkOpAnd(b *testing.B) {
 }
 
 func BenchmarkOpOr(b *testing.B) {
-	fuzz_helper.AddCoverage(15638)
+	fuzz_helper.AddCoverage(1094)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -250,7 +298,9 @@ func BenchmarkOpOr(b *testing.B) {
 }
 
 func BenchmarkOpXor(b *testing.B) {
-	fuzz_helper.AddCoverage(45869)
+	fuzz_helper.AddCoverage(10390)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -258,7 +308,9 @@ func BenchmarkOpXor(b *testing.B) {
 }
 
 func BenchmarkOpByte(b *testing.B) {
-	fuzz_helper.AddCoverage(23368)
+	fuzz_helper.AddCoverage(43817)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 
@@ -266,7 +318,9 @@ func BenchmarkOpByte(b *testing.B) {
 }
 
 func BenchmarkOpAddmod(b *testing.B) {
-	fuzz_helper.AddCoverage(12901)
+	fuzz_helper.AddCoverage(42883)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	z := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
@@ -275,7 +329,9 @@ func BenchmarkOpAddmod(b *testing.B) {
 }
 
 func BenchmarkOpMulmod(b *testing.B) {
-	fuzz_helper.AddCoverage(12499)
+	fuzz_helper.AddCoverage(35848)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	y := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"
 	z := "ABCDEF090807060504030201ffffffffffffffffffffffffffffffffffffffff"

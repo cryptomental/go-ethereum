@@ -10,64 +10,172 @@ import (
 )
 
 func NoopCanTransfer(db StateDB, from common.Address, balance *big.Int) bool {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(12095)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return true
 }
 func NoopTransfer(db StateDB, from, to common.Address, amount *big.Int) {
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(14350)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 }
 
 type NoopEVMCallContext struct{}
 
 func (NoopEVMCallContext) Call(caller ContractRef, addr common.Address, data []byte, gas, value *big.Int) ([]byte, error) {
-	fuzz_helper.AddCoverage(5262)
+	fuzz_helper.AddCoverage(23405)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return nil, nil
 }
 func (NoopEVMCallContext) CallCode(caller ContractRef, addr common.Address, data []byte, gas, value *big.Int) ([]byte, error) {
-	fuzz_helper.AddCoverage(17878)
+	fuzz_helper.AddCoverage(2467)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return nil, nil
 }
 func (NoopEVMCallContext) Create(caller ContractRef, data []byte, gas, value *big.Int) ([]byte, common.Address, error) {
-	fuzz_helper.AddCoverage(45021)
+	fuzz_helper.AddCoverage(29828)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return nil, common.Address{}, nil
 }
 func (NoopEVMCallContext) DelegateCall(me ContractRef, addr common.Address, data []byte, gas *big.Int) ([]byte, error) {
-	fuzz_helper.AddCoverage(39040)
+	fuzz_helper.AddCoverage(13291)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return nil, nil
 }
 
 type NoopStateDB struct{}
 
-func (NoopStateDB) CreateAccount(common.Address)        { fuzz_helper.AddCoverage(2095) }
-func (NoopStateDB) SubBalance(common.Address, *big.Int) { fuzz_helper.AddCoverage(21668) }
-func (NoopStateDB) AddBalance(common.Address, *big.Int) { fuzz_helper.AddCoverage(45213) }
-func (NoopStateDB) GetBalance(common.Address) *big.Int  { fuzz_helper.AddCoverage(16619); return nil }
-func (NoopStateDB) GetNonce(common.Address) uint64      { fuzz_helper.AddCoverage(12692); return 0 }
-func (NoopStateDB) SetNonce(common.Address, uint64)     { fuzz_helper.AddCoverage(42483) }
+func (NoopStateDB) CreateAccount(common.Address) {
+	fuzz_helper.AddCoverage(16133)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+}
+func (NoopStateDB) SubBalance(common.Address, *big.Int) {
+	fuzz_helper.AddCoverage(46085)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+}
+func (NoopStateDB) AddBalance(common.Address, *big.Int) {
+	fuzz_helper.AddCoverage(9125)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+}
+func (NoopStateDB) GetBalance(common.Address) *big.Int {
+	fuzz_helper.AddCoverage(22394)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+	return nil
+}
+func (NoopStateDB) GetNonce(common.Address) uint64 {
+	fuzz_helper.AddCoverage(63521)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+	return 0
+}
+func (NoopStateDB) SetNonce(common.Address, uint64) {
+	fuzz_helper.AddCoverage(60963)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+}
 func (NoopStateDB) GetCodeHash(common.Address) common.Hash {
-	fuzz_helper.AddCoverage(6577)
+	fuzz_helper.AddCoverage(47938)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return common.Hash{}
 }
-func (NoopStateDB) GetCode(common.Address) []byte  { fuzz_helper.AddCoverage(17393); return nil }
-func (NoopStateDB) SetCode(common.Address, []byte) { fuzz_helper.AddCoverage(64174) }
-func (NoopStateDB) GetCodeSize(common.Address) int { fuzz_helper.AddCoverage(38740); return 0 }
-func (NoopStateDB) AddRefund(*big.Int)             { fuzz_helper.AddCoverage(35657) }
-func (NoopStateDB) GetRefund() *big.Int            { fuzz_helper.AddCoverage(30358); return nil }
+func (NoopStateDB) GetCode(common.Address) []byte {
+	fuzz_helper.AddCoverage(57932)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+	return nil
+}
+func (NoopStateDB) SetCode(common.Address, []byte) {
+	fuzz_helper.AddCoverage(47610)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+}
+func (NoopStateDB) GetCodeSize(common.Address) int {
+	fuzz_helper.AddCoverage(9424)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+	return 0
+}
+func (NoopStateDB) AddRefund(*big.Int) {
+	fuzz_helper.AddCoverage(3615)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+}
+func (NoopStateDB) GetRefund() *big.Int {
+	fuzz_helper.AddCoverage(48133)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+	return nil
+}
 func (NoopStateDB) GetState(common.Address, common.Hash) common.Hash {
-	fuzz_helper.AddCoverage(23294)
+	fuzz_helper.AddCoverage(47314)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return common.Hash{}
 }
-func (NoopStateDB) SetState(common.Address, common.Hash, common.Hash) { fuzz_helper.AddCoverage(61639) }
-func (NoopStateDB) Suicide(common.Address) bool                       { fuzz_helper.AddCoverage(11162); return false }
-func (NoopStateDB) HasSuicided(common.Address) bool                   { fuzz_helper.AddCoverage(49217); return false }
-func (NoopStateDB) Exist(common.Address) bool                         { fuzz_helper.AddCoverage(34511); return false }
-func (NoopStateDB) Empty(common.Address) bool                         { fuzz_helper.AddCoverage(64074); return false }
-func (NoopStateDB) RevertToSnapshot(int)                              { fuzz_helper.AddCoverage(28614) }
-func (NoopStateDB) Snapshot() int                                     { fuzz_helper.AddCoverage(39226); return 0 }
-func (NoopStateDB) AddLog(*types.Log)                                 { fuzz_helper.AddCoverage(2297) }
-func (NoopStateDB) AddPreimage(common.Hash, []byte)                   { fuzz_helper.AddCoverage(40870) }
+func (NoopStateDB) SetState(common.Address, common.Hash, common.Hash) {
+	fuzz_helper.AddCoverage(12873)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+}
+func (NoopStateDB) Suicide(common.Address) bool {
+	fuzz_helper.AddCoverage(33227)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+	return false
+}
+func (NoopStateDB) HasSuicided(common.Address) bool {
+	fuzz_helper.AddCoverage(15626)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+	return false
+}
+func (NoopStateDB) Exist(common.Address) bool {
+	fuzz_helper.AddCoverage(56132)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+	return false
+}
+func (NoopStateDB) Empty(common.Address) bool {
+	fuzz_helper.AddCoverage(37300)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+	return false
+}
+func (NoopStateDB) RevertToSnapshot(int) {
+	fuzz_helper.AddCoverage(18889)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+}
+func (NoopStateDB) Snapshot() int {
+	fuzz_helper.AddCoverage(55662)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+	return 0
+}
+func (NoopStateDB) AddLog(*types.Log) {
+	fuzz_helper.AddCoverage(33806)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+}
+func (NoopStateDB) AddPreimage(common.Hash, []byte) {
+	fuzz_helper.AddCoverage(9009)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+}
 func (NoopStateDB) ForEachStorage(common.Address, func(common.Hash, common.Hash) bool) {
-	fuzz_helper.AddCoverage(52877)
+	fuzz_helper.AddCoverage(6760)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 }
 
 var _ = fuzz_helper.AddCoverage

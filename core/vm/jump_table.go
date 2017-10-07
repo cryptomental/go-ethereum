@@ -45,7 +45,9 @@ var (
 // NewByzantiumInstructionSet returns the frontier, homestead and
 // byzantium instructions.
 func NewByzantiumInstructionSet() [256]operation {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(33265)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	instructionSet := NewHomesteadInstructionSet()
 	instructionSet[STATICCALL] = operation{
@@ -84,7 +86,9 @@ func NewByzantiumInstructionSet() [256]operation {
 // NewHomesteadInstructionSet returns the frontier and homestead
 // instructions that can be executed during the homestead phase.
 func NewHomesteadInstructionSet() [256]operation {
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(38964)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	instructionSet := NewFrontierInstructionSet()
 	instructionSet[DELEGATECALL] = operation{
 		execute:       opDelegateCall,
@@ -100,7 +104,9 @@ func NewHomesteadInstructionSet() [256]operation {
 // NewFrontierInstructionSet returns the frontier instructions
 // that can be executed during the frontier phase.
 func NewFrontierInstructionSet() [256]operation {
-	fuzz_helper.AddCoverage(5262)
+	fuzz_helper.AddCoverage(32590)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return [256]operation{
 		STOP: {
 			execute:       opStop,

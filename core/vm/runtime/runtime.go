@@ -37,9 +37,11 @@ type Config struct {
 
 // sets defaults on the config
 func setDefaults(cfg *Config) {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(18098)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if cfg.ChainConfig == nil {
-		fuzz_helper.AddCoverage(45213)
+		fuzz_helper.AddCoverage(29662)
 		cfg.ChainConfig = &params.ChainConfig{
 			ChainId:        big.NewInt(1),
 			HomesteadBlock: new(big.Int),
@@ -50,60 +52,60 @@ func setDefaults(cfg *Config) {
 			EIP158Block:    new(big.Int),
 		}
 	} else {
-		fuzz_helper.AddCoverage(16619)
+		fuzz_helper.AddCoverage(37203)
 	}
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(23681)
 
 	if cfg.Difficulty == nil {
-		fuzz_helper.AddCoverage(12692)
+		fuzz_helper.AddCoverage(60325)
 		cfg.Difficulty = new(big.Int)
 	} else {
-		fuzz_helper.AddCoverage(42483)
+		fuzz_helper.AddCoverage(4473)
 	}
-	fuzz_helper.AddCoverage(5262)
+	fuzz_helper.AddCoverage(10981)
 	if cfg.Time == nil {
-		fuzz_helper.AddCoverage(6577)
+		fuzz_helper.AddCoverage(18212)
 		cfg.Time = big.NewInt(time.Now().Unix())
 	} else {
-		fuzz_helper.AddCoverage(17393)
+		fuzz_helper.AddCoverage(46492)
 	}
-	fuzz_helper.AddCoverage(17878)
+	fuzz_helper.AddCoverage(8103)
 	if cfg.GasLimit == 0 {
-		fuzz_helper.AddCoverage(64174)
+		fuzz_helper.AddCoverage(63372)
 		cfg.GasLimit = math.MaxUint64
 	} else {
-		fuzz_helper.AddCoverage(38740)
+		fuzz_helper.AddCoverage(18996)
 	}
-	fuzz_helper.AddCoverage(45021)
+	fuzz_helper.AddCoverage(14995)
 	if cfg.GasPrice == nil {
-		fuzz_helper.AddCoverage(35657)
+		fuzz_helper.AddCoverage(56685)
 		cfg.GasPrice = new(big.Int)
 	} else {
-		fuzz_helper.AddCoverage(30358)
+		fuzz_helper.AddCoverage(7152)
 	}
-	fuzz_helper.AddCoverage(39040)
+	fuzz_helper.AddCoverage(34345)
 	if cfg.Value == nil {
-		fuzz_helper.AddCoverage(23294)
+		fuzz_helper.AddCoverage(30914)
 		cfg.Value = new(big.Int)
 	} else {
-		fuzz_helper.AddCoverage(61639)
+		fuzz_helper.AddCoverage(61203)
 	}
-	fuzz_helper.AddCoverage(2095)
+	fuzz_helper.AddCoverage(60137)
 	if cfg.BlockNumber == nil {
-		fuzz_helper.AddCoverage(11162)
+		fuzz_helper.AddCoverage(45477)
 		cfg.BlockNumber = new(big.Int)
 	} else {
-		fuzz_helper.AddCoverage(49217)
+		fuzz_helper.AddCoverage(61123)
 	}
-	fuzz_helper.AddCoverage(21668)
+	fuzz_helper.AddCoverage(907)
 	if cfg.GetHashFn == nil {
-		fuzz_helper.AddCoverage(34511)
+		fuzz_helper.AddCoverage(3505)
 		cfg.GetHashFn = func(n uint64) common.Hash {
-			fuzz_helper.AddCoverage(64074)
+			fuzz_helper.AddCoverage(27510)
 			return common.BytesToHash(crypto.Keccak256([]byte(new(big.Int).SetUint64(n).String())))
 		}
 	} else {
-		fuzz_helper.AddCoverage(28614)
+		fuzz_helper.AddCoverage(17408)
 	}
 }
 
@@ -114,24 +116,26 @@ func setDefaults(cfg *Config) {
 // the given code. It enabled the JIT by default and make sure that it's restored
 // to it's original state afterwards.
 func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
-	fuzz_helper.AddCoverage(39226)
+	fuzz_helper.AddCoverage(29199)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if cfg == nil {
-		fuzz_helper.AddCoverage(52877)
+		fuzz_helper.AddCoverage(16497)
 		cfg = new(Config)
 	} else {
-		fuzz_helper.AddCoverage(778)
+		fuzz_helper.AddCoverage(33471)
 	}
-	fuzz_helper.AddCoverage(2297)
+	fuzz_helper.AddCoverage(5881)
 	setDefaults(cfg)
 
 	if cfg.State == nil {
-		fuzz_helper.AddCoverage(33340)
+		fuzz_helper.AddCoverage(43595)
 		db, _ := ethdb.NewMemDatabase()
 		cfg.State, _ = state.New(common.Hash{}, state.NewDatabase(db))
 	} else {
-		fuzz_helper.AddCoverage(15638)
+		fuzz_helper.AddCoverage(34531)
 	}
-	fuzz_helper.AddCoverage(40870)
+	fuzz_helper.AddCoverage(4435)
 	var (
 		address = common.StringToAddress("contract")
 		vmenv   = NewEnv(cfg)
@@ -154,24 +158,26 @@ func Execute(code, input []byte, cfg *Config) ([]byte, *state.StateDB, error) {
 
 // Create executes the code using the EVM create method
 func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
-	fuzz_helper.AddCoverage(45869)
+	fuzz_helper.AddCoverage(8882)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if cfg == nil {
-		fuzz_helper.AddCoverage(12499)
+		fuzz_helper.AddCoverage(16595)
 		cfg = new(Config)
 	} else {
-		fuzz_helper.AddCoverage(42993)
+		fuzz_helper.AddCoverage(56682)
 	}
-	fuzz_helper.AddCoverage(23368)
+	fuzz_helper.AddCoverage(64691)
 	setDefaults(cfg)
 
 	if cfg.State == nil {
-		fuzz_helper.AddCoverage(30301)
+		fuzz_helper.AddCoverage(9660)
 		db, _ := ethdb.NewMemDatabase()
 		cfg.State, _ = state.New(common.Hash{}, state.NewDatabase(db))
 	} else {
-		fuzz_helper.AddCoverage(45210)
+		fuzz_helper.AddCoverage(56029)
 	}
-	fuzz_helper.AddCoverage(12901)
+	fuzz_helper.AddCoverage(51357)
 	var (
 		vmenv  = NewEnv(cfg)
 		sender = vm.AccountRef(cfg.Origin)
@@ -192,7 +198,9 @@ func Create(input []byte, cfg *Config) ([]byte, common.Address, uint64, error) {
 // Call, unlike Execute, requires a config and also requires the State field to
 // be set.
 func Call(address common.Address, input []byte, cfg *Config) ([]byte, uint64, error) {
-	fuzz_helper.AddCoverage(264)
+	fuzz_helper.AddCoverage(42980)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	setDefaults(cfg)
 
 	vmenv := NewEnv(cfg)

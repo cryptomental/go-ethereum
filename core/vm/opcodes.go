@@ -10,20 +10,24 @@ import (
 type OpCode byte
 
 func (op OpCode) IsPush() bool {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(21695)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	switch op {
 	case PUSH1, PUSH2, PUSH3, PUSH4, PUSH5, PUSH6, PUSH7, PUSH8, PUSH9, PUSH10, PUSH11, PUSH12, PUSH13, PUSH14, PUSH15, PUSH16, PUSH17, PUSH18, PUSH19, PUSH20, PUSH21, PUSH22, PUSH23, PUSH24, PUSH25, PUSH26, PUSH27, PUSH28, PUSH29, PUSH30, PUSH31, PUSH32:
-		fuzz_helper.AddCoverage(5262)
+		fuzz_helper.AddCoverage(14525)
 		return true
 	default:
-		fuzz_helper.AddCoverage(17878)
+		fuzz_helper.AddCoverage(23020)
 	}
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(28521)
 	return false
 }
 
 func (op OpCode) IsStaticJump() bool {
-	fuzz_helper.AddCoverage(45021)
+	fuzz_helper.AddCoverage(64271)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return op == JUMP
 }
 
@@ -354,15 +358,17 @@ var opCodeToString = map[OpCode]string{
 }
 
 func (o OpCode) String() string {
-	fuzz_helper.AddCoverage(39040)
+	fuzz_helper.AddCoverage(40253)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	str := opCodeToString[o]
 	if len(str) == 0 {
-		fuzz_helper.AddCoverage(21668)
+		fuzz_helper.AddCoverage(39619)
 		return fmt.Sprintf("Missing opcode 0x%x", int(o))
 	} else {
-		fuzz_helper.AddCoverage(45213)
+		fuzz_helper.AddCoverage(48623)
 	}
-	fuzz_helper.AddCoverage(2095)
+	fuzz_helper.AddCoverage(47040)
 
 	return str
 }
@@ -505,7 +511,9 @@ var stringToOp = map[string]OpCode{
 }
 
 func StringToOp(str string) OpCode {
-	fuzz_helper.AddCoverage(16619)
+	fuzz_helper.AddCoverage(34192)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return stringToOp[str]
 }
 

@@ -16,6 +16,8 @@ type destinations map[common.Hash][]byte
 // has checks whether code has a JUMPDEST at dest.
 func (d destinations) has(codehash common.Hash, code []byte, dest *big.Int) bool {
 	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	udest := dest.Uint64()
 	if dest.BitLen() >= 63 || udest >= uint64(len(code)) {
@@ -42,6 +44,8 @@ func (d destinations) has(codehash common.Hash, code []byte, dest *big.Int) bool
 // PC location that is a JUMPDEST instruction.
 func jumpdests(code []byte) []byte {
 	fuzz_helper.AddCoverage(21668)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	m := make([]byte, len(code)/8+1)
 	for pc := uint64(0); pc < uint64(len(code)); pc++ {
 		fuzz_helper.AddCoverage(16619)

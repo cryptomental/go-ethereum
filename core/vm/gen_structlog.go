@@ -12,7 +12,9 @@ import (
 )
 
 func (s StructLog) MarshalJSON() ([]byte, error) {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(25636)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	type StructLog struct {
 		Pc         uint64                      `json:"pc"`
 		Op         OpCode                      `json:"op"`
@@ -34,16 +36,16 @@ func (s StructLog) MarshalJSON() ([]byte, error) {
 	enc.Memory = s.Memory
 	enc.MemorySize = s.MemorySize
 	if s.Stack != nil {
-		fuzz_helper.AddCoverage(5262)
+		fuzz_helper.AddCoverage(6081)
 		enc.Stack = make([]*math.HexOrDecimal256, len(s.Stack))
 		for k, v := range s.Stack {
-			fuzz_helper.AddCoverage(17878)
+			fuzz_helper.AddCoverage(54249)
 			enc.Stack[k] = (*math.HexOrDecimal256)(v)
 		}
 	} else {
-		fuzz_helper.AddCoverage(45021)
+		fuzz_helper.AddCoverage(25709)
 	}
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(12742)
 	enc.Storage = s.Storage
 	enc.Depth = s.Depth
 	enc.Err = s.Err
@@ -52,7 +54,9 @@ func (s StructLog) MarshalJSON() ([]byte, error) {
 }
 
 func (s *StructLog) UnmarshalJSON(input []byte) error {
-	fuzz_helper.AddCoverage(39040)
+	fuzz_helper.AddCoverage(10433)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	type StructLog struct {
 		Pc         *uint64                     `json:"pc"`
 		Op         *OpCode                     `json:"op"`
@@ -67,86 +71,86 @@ func (s *StructLog) UnmarshalJSON(input []byte) error {
 	}
 	var dec StructLog
 	if err := json.Unmarshal(input, &dec); err != nil {
-		fuzz_helper.AddCoverage(30358)
+		fuzz_helper.AddCoverage(58192)
 		return err
 	} else {
-		fuzz_helper.AddCoverage(23294)
+		fuzz_helper.AddCoverage(6264)
 	}
-	fuzz_helper.AddCoverage(2095)
+	fuzz_helper.AddCoverage(53609)
 	if dec.Pc != nil {
-		fuzz_helper.AddCoverage(61639)
+		fuzz_helper.AddCoverage(47208)
 		s.Pc = *dec.Pc
 	} else {
-		fuzz_helper.AddCoverage(11162)
+		fuzz_helper.AddCoverage(34399)
 	}
-	fuzz_helper.AddCoverage(21668)
+	fuzz_helper.AddCoverage(27059)
 	if dec.Op != nil {
-		fuzz_helper.AddCoverage(49217)
+		fuzz_helper.AddCoverage(41921)
 		s.Op = *dec.Op
 	} else {
-		fuzz_helper.AddCoverage(34511)
+		fuzz_helper.AddCoverage(28285)
 	}
-	fuzz_helper.AddCoverage(45213)
+	fuzz_helper.AddCoverage(34057)
 	if dec.Gas != nil {
-		fuzz_helper.AddCoverage(64074)
+		fuzz_helper.AddCoverage(17422)
 		s.Gas = uint64(*dec.Gas)
 	} else {
-		fuzz_helper.AddCoverage(28614)
+		fuzz_helper.AddCoverage(56637)
 	}
-	fuzz_helper.AddCoverage(16619)
+	fuzz_helper.AddCoverage(45816)
 	if dec.GasCost != nil {
-		fuzz_helper.AddCoverage(39226)
+		fuzz_helper.AddCoverage(39095)
 		s.GasCost = uint64(*dec.GasCost)
 	} else {
-		fuzz_helper.AddCoverage(2297)
+		fuzz_helper.AddCoverage(28179)
 	}
-	fuzz_helper.AddCoverage(12692)
+	fuzz_helper.AddCoverage(44693)
 	if dec.Memory != nil {
-		fuzz_helper.AddCoverage(40870)
+		fuzz_helper.AddCoverage(3887)
 		s.Memory = dec.Memory
 	} else {
-		fuzz_helper.AddCoverage(52877)
+		fuzz_helper.AddCoverage(51012)
 	}
-	fuzz_helper.AddCoverage(42483)
+	fuzz_helper.AddCoverage(29622)
 	if dec.MemorySize != nil {
-		fuzz_helper.AddCoverage(778)
+		fuzz_helper.AddCoverage(17785)
 		s.MemorySize = *dec.MemorySize
 	} else {
-		fuzz_helper.AddCoverage(33340)
+		fuzz_helper.AddCoverage(39631)
 	}
-	fuzz_helper.AddCoverage(6577)
+	fuzz_helper.AddCoverage(29487)
 	if dec.Stack != nil {
-		fuzz_helper.AddCoverage(15638)
+		fuzz_helper.AddCoverage(22481)
 		s.Stack = make([]*big.Int, len(dec.Stack))
 		for k, v := range dec.Stack {
-			fuzz_helper.AddCoverage(45869)
+			fuzz_helper.AddCoverage(36927)
 			s.Stack[k] = (*big.Int)(v)
 		}
 	} else {
-		fuzz_helper.AddCoverage(23368)
+		fuzz_helper.AddCoverage(41592)
 	}
-	fuzz_helper.AddCoverage(17393)
+	fuzz_helper.AddCoverage(60994)
 	if dec.Storage != nil {
-		fuzz_helper.AddCoverage(12901)
+		fuzz_helper.AddCoverage(63414)
 		s.Storage = dec.Storage
 	} else {
-		fuzz_helper.AddCoverage(12499)
+		fuzz_helper.AddCoverage(34780)
 	}
-	fuzz_helper.AddCoverage(64174)
+	fuzz_helper.AddCoverage(5594)
 	if dec.Depth != nil {
-		fuzz_helper.AddCoverage(42993)
+		fuzz_helper.AddCoverage(18579)
 		s.Depth = *dec.Depth
 	} else {
-		fuzz_helper.AddCoverage(30301)
+		fuzz_helper.AddCoverage(15389)
 	}
-	fuzz_helper.AddCoverage(38740)
+	fuzz_helper.AddCoverage(35504)
 	if dec.Err != nil {
-		fuzz_helper.AddCoverage(45210)
+		fuzz_helper.AddCoverage(63602)
 		s.Err = *dec.Err
 	} else {
-		fuzz_helper.AddCoverage(264)
+		fuzz_helper.AddCoverage(27256)
 	}
-	fuzz_helper.AddCoverage(35657)
+	fuzz_helper.AddCoverage(57201)
 	return nil
 }
 

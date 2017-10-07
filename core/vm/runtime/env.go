@@ -11,11 +11,13 @@ import (
 )
 
 func NewEnv(cfg *Config) *vm.EVM {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(11986)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	context := vm.Context{
 		CanTransfer: core.CanTransfer,
 		Transfer:    core.Transfer,
-		GetHash:     func(uint64) common.Hash { fuzz_helper.AddCoverage(5262); return common.Hash{} },
+		GetHash:     func(uint64) common.Hash { fuzz_helper.AddCoverage(45867); return common.Hash{} },
 
 		Origin:      cfg.Origin,
 		Coinbase:    cfg.Coinbase,
@@ -25,7 +27,7 @@ func NewEnv(cfg *Config) *vm.EVM {
 		GasLimit:    new(big.Int).SetUint64(cfg.GasLimit),
 		GasPrice:    cfg.GasPrice,
 	}
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(11299)
 
 	return vm.NewEVM(context, cfg.State, cfg.ChainConfig, cfg.EVMConfig)
 }
