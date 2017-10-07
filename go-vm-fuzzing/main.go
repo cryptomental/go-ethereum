@@ -16,6 +16,16 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 )
 
+var no_tracer bool;
+
+//export SetInstrumentationType
+func SetInstrumentationType(t int) {
+    if t == 1 || t == 2 {
+        no_tracer = true;
+    }
+    fuzz_helper.SetInstrumentationType(t)
+}
+
 //export GoResetCoverage
 func GoResetCoverage() {
     fuzz_helper.ResetCoverage()
@@ -186,8 +196,13 @@ func runVM(
 		GasPrice:   new(big.Int).SetUint64(gasprice),
 	}
 
+    no_tracer = true
     tracer := vm.NewStructLogger(nil)
-    env := vm.NewEVM(context, statedb, params.MainnetChainConfig, vm.Config{Debug: true, Tracer: tracer})
+    vm_config := vm.Config{Debug: true, Tracer: tracer}
+    if no_tracer == true  {
+        vm_config = vm.Config{}
+    }
+    env := vm.NewEVM(context, statedb, params.MainnetChainConfig, vm_config)
 	contract := vm.NewContract(account{}, account{}, big.NewInt(0), gas)
 	contract.Code = input
 
@@ -203,39 +218,41 @@ func runVM(
         *success = 0
     }
 
-    logs := tracer.StructLogs()
-    i := 0
-    loglen := len(logs)
-    /* This loop stores the variables address, opcode, gas at every step
-       of the execution as well as the final stack state, for later
-       retrieval by the fuzzer.
-    */
-    for _, t := range logs {
-        i++
-
-        /* Set g_stack to the final stack state */
-        if i == loglen {
-            for _, t2 := range t.Stack {
-                g_stack = append(g_stack, *t2)
-            }
-        }
-        g_addresses = append(g_addresses, t.Pc)
-        var o = uint64(t.Op)
-        g_opcodes = append(g_opcodes, o)
-        g_gases = append(g_gases, t.Gas)
-    }
-
-    /* Print address, opcode, gas at every step of the execution
-       if the fuzzer is run with --trace
-    */
-    if do_trace != 0 {
-        execution_num := 1
+    if no_tracer == false {
+        logs := tracer.StructLogs()
+        i := 0
+        loglen := len(logs)
+        /* This loop stores the variables address, opcode, gas at every step
+        of the execution as well as the final stack state, for later
+        retrieval by the fuzzer.
+        */
         for _, t := range logs {
-            fmt.Printf("[%v] %v : %v\n", execution_num, t.Pc, t.Op)
-            fmt.Printf("Stack: %v\n", t.Stack)
-            fmt.Printf("Gas: %v\n", t.Gas)
+            i++
 
-            execution_num++;
+            /* Set g_stack to the final stack state */
+            if i == loglen {
+                for _, t2 := range t.Stack {
+                    g_stack = append(g_stack, *t2)
+                }
+            }
+            g_addresses = append(g_addresses, t.Pc)
+            var o = uint64(t.Op)
+            g_opcodes = append(g_opcodes, o)
+            g_gases = append(g_gases, t.Gas)
+        }
+
+        /* Print address, opcode, gas at every step of the execution
+        if the fuzzer is run with --trace
+        */
+        if do_trace != 0 {
+            execution_num := 1
+            for _, t := range logs {
+                fmt.Printf("[%v] %v : %v\n", execution_num, t.Pc, t.Op)
+                fmt.Printf("Stack: %v\n", t.Stack)
+                fmt.Printf("Gas: %v\n", t.Gas)
+
+                execution_num++;
+            }
         }
     }
 }
