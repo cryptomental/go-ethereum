@@ -171,6 +171,22 @@ func runVM(
 	sdb := state.NewDatabase(db)
 	statedb, _ := state.New(common.Hash{}, sdb)
 
+    addr := common.HexToAddress("0x1")
+    balance := new(big.Int).SetUint64(1);
+    statedb.SetBalance(addr, balance)
+
+    addr = common.HexToAddress("0x2")
+    statedb.SetBalance(addr, balance)
+
+    addr = common.HexToAddress("0x3")
+    statedb.SetBalance(addr, balance)
+
+    addr = common.HexToAddress("0x4")
+    statedb.SetBalance(addr, balance)
+
+	root, _ := statedb.CommitTo(db, false)
+	statedb, _ = state.New(root, sdb)
+
     /* Helper functions required for correct functioning of the VM */
 	canTransfer := func(db vm.StateDB, address common.Address, amount *big.Int) bool {
         return db.GetBalance(address).Cmp(amount) >= 0
@@ -201,7 +217,7 @@ func runVM(
     if no_tracer == true  {
         vm_config = vm.Config{}
     }
-    env := vm.NewEVM(context, statedb, params.MainnetChainConfig, vm_config)
+    env := vm.NewEVM(context, statedb, params.TestnetChainConfig, vm_config)
 	contract := vm.NewContract(account{}, account{}, big.NewInt(0), gas)
 	contract.Code = input
 
