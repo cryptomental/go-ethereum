@@ -196,7 +196,7 @@ func runVM(
         db.AddBalance(recipient, amount)
     }
     vmTestBlockHash := func(n uint64) common.Hash {
-        i := new(big.Int).SetUint64(123)
+        i := new(big.Int).SetUint64(0)
         return common.BigToHash(i)
     }
 
