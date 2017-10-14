@@ -725,6 +725,7 @@ func opJump(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Sta
 	fuzz_helper.AddCoverage(6834)
 	fuzz_helper.IncrementStack()
 	defer fuzz_helper.DecrementStack()
+    /* GUIDO */ return nil, fmt.Errorf("invalid jump destination")
 	pos := stack.pop()
 	if !contract.jumpdests.has(contract.CodeHash, contract.Code, pos) {
 		fuzz_helper.AddCoverage(2401)
@@ -744,6 +745,7 @@ func opJumpi(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 	fuzz_helper.AddCoverage(41154)
 	fuzz_helper.IncrementStack()
 	defer fuzz_helper.DecrementStack()
+    /* GUIDO */ return nil, fmt.Errorf("invalid jump destination")
 	pos, cond := stack.pop(), stack.pop()
 	if cond.Sign() != 0 {
 		fuzz_helper.AddCoverage(48780)
