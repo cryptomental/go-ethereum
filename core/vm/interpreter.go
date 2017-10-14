@@ -176,12 +176,6 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		op = contract.GetOp(pc)
 
 		operation := in.cfg.JumpTable[op]
-		if err := in.enforceRestrictions(op, operation, stack); err != nil {
-			fuzz_helper.AddCoverage(16476)
-			return nil, err
-		} else {
-			fuzz_helper.AddCoverage(5103)
-		}
 		fuzz_helper.AddCoverage(52932)
 
 		if !operation.valid {
@@ -198,6 +192,11 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		} else {
 			fuzz_helper.AddCoverage(61834)
 		}
+        // If the operation is valid, enforce and write restrictions
+        if err := in.enforceRestrictions(op, operation, stack); err != nil {
+			fuzz_helper.AddCoverage(61835)
+            return nil, err
+        }
 		fuzz_helper.AddCoverage(42112)
 
 		var memorySize uint64
