@@ -176,7 +176,7 @@ func gasSStore(gt params.GasTable, evm *EVM, contract *Contract, stack *Stack, m
 
 		return params.SstoreSetGas, nil
 	} else {
-		fuzz_helper.AddCoverage(15925)
+		fuzz_helper.AddCoverage(15926)
 		if !common.EmptyHash(val) && common.EmptyHash(common.BigToHash(y)) {
 			fuzz_helper.AddCoverage(4784)
 			evm.StateDB.AddRefund(new(big.Int).SetUint64(params.SstoreRefundGas))
@@ -203,7 +203,7 @@ func makeGasLog(n uint64) gasFunc {
 		} else {
 			fuzz_helper.AddCoverage(64301)
 		}
-		fuzz_helper.AddCoverage(32228)
+		fuzz_helper.AddCoverage(32229)
 
 		gas, err := memoryGasCost(mem, memorySize)
 		if err != nil {
@@ -329,7 +329,7 @@ func gasCodeCopy(gt params.GasTable, evm *EVM, contract *Contract, stack *Stack,
 		fuzz_helper.AddCoverage(17467)
 		return 0, errGasUintOverflow
 	} else {
-		fuzz_helper.AddCoverage(4556)
+		fuzz_helper.AddCoverage(4557)
 	}
 	fuzz_helper.AddCoverage(62100)
 	if gas, overflow = math.SafeAdd(gas, wordGas); overflow {
@@ -769,7 +769,7 @@ func gasStaticCall(gt params.GasTable, evm *EVM, contract *Contract, stack *Stac
 	} else {
 		fuzz_helper.AddCoverage(22638)
 	}
-	fuzz_helper.AddCoverage(62902)
+	fuzz_helper.AddCoverage(62903)
 
 	cg, err := callGas(gt, contract.Gas, gas, stack.Back(0))
 	if err != nil {

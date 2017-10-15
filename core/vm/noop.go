@@ -134,7 +134,7 @@ func (NoopStateDB) Suicide(common.Address) bool {
 	return false
 }
 func (NoopStateDB) HasSuicided(common.Address) bool {
-	fuzz_helper.AddCoverage(15626)
+	fuzz_helper.AddCoverage(15627)
 	fuzz_helper.IncrementStack()
 	defer fuzz_helper.DecrementStack()
 	return false

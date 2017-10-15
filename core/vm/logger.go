@@ -63,7 +63,7 @@ type structLogMarshaling struct {
 }
 
 func (s *StructLog) OpName() string {
-	fuzz_helper.AddCoverage(16062)
+	fuzz_helper.AddCoverage(16063)
 	fuzz_helper.IncrementStack()
 	defer fuzz_helper.DecrementStack()
 	return s.Op.String()
@@ -109,7 +109,7 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 	} else {
 		fuzz_helper.AddCoverage(15617)
 	}
-	fuzz_helper.AddCoverage(23690)
+	fuzz_helper.AddCoverage(23691)
 
 	if l.changedValues[contract.Address()] == nil {
 		fuzz_helper.AddCoverage(23241)

@@ -894,7 +894,7 @@ func opCall(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Sta
 }
 
 func opCallCode(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	fuzz_helper.AddCoverage(2960)
+	fuzz_helper.AddCoverage(2961)
 	fuzz_helper.IncrementStack()
 	defer fuzz_helper.DecrementStack()
 	gas := stack.pop().Uint64()

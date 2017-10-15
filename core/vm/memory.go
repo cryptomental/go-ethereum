@@ -113,7 +113,7 @@ func (m *Memory) Len() int {
 
 // Data returns the backing slice
 func (m *Memory) Data() []byte {
-	fuzz_helper.AddCoverage(20517)
+	fuzz_helper.AddCoverage(20518)
 	fuzz_helper.IncrementStack()
 	defer fuzz_helper.DecrementStack()
 	return m.store
