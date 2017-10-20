@@ -213,7 +213,14 @@ func runVM(
 		GasPrice:   new(big.Int).SetUint64(gasprice),
 	}
 
-    tracer := vm.NewStructLogger(nil)
+	logger_config := &vm.LogConfig{
+        DisableStack: false,
+        DisableStorage: true,
+        FullStorage: false,
+        Limit: 0,
+        DisableMemory: true,
+	}
+    tracer := vm.NewStructLogger(logger_config)
     vm_config := vm.Config{Debug: true, Tracer: tracer}
     if no_tracer == true  {
         vm_config = vm.Config{}
