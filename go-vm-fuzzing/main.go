@@ -157,7 +157,8 @@ func runVM(
     time uint64,
     gaslimit uint64,
     difficulty uint64,
-    gasprice uint64) {
+    gasprice uint64,
+    c_balance int64) {
 
     g_addresses = nil
     g_opcodes = nil
@@ -218,7 +219,7 @@ func runVM(
         vm_config = vm.Config{}
     }
     env := vm.NewEVM(context, statedb, params.TestnetChainConfig, vm_config)
-	contract := vm.NewContract(account{}, account{}, big.NewInt(0), gas)
+	contract := vm.NewContract(account{}, account{}, big.NewInt(c_balance), gas)
 	contract.Code = input
 
     /* Execute the byte code */
