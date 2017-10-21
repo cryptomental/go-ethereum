@@ -15,6 +15,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
+var LastStack []*big.Int
+
 type Storage map[common.Hash]common.Hash
 
 func (self Storage) Copy() Storage {
@@ -141,13 +143,12 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 	}
 	fuzz_helper.AddCoverage(11919)
 
-	var stck []*big.Int
 	if !l.cfg.DisableStack {
 		fuzz_helper.AddCoverage(45727)
-		stck = make([]*big.Int, len(stack.Data()))
+		LastStack = make([]*big.Int, len(stack.Data()))
 		for i, item := range stack.Data() {
 			fuzz_helper.AddCoverage(50494)
-			stck[i] = new(big.Int).Set(item)
+			LastStack[i] = new(big.Int).Set(item)
 		}
 	} else {
 		fuzz_helper.AddCoverage(22109)
@@ -177,6 +178,7 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 	}
 	fuzz_helper.AddCoverage(51530)
 
+	var stck []*big.Int
 	log := StructLog{pc, op, gas, cost, mem, memory.Len(), stck, storage, depth, err}
 
 	l.logs = append(l.logs, log)

@@ -3,6 +3,7 @@ package main
 import "C"
 
 import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
+import vmlogger "github.com/ethereum/go-ethereum/core/vm"
 
 import (
 	"math/big"
@@ -243,25 +244,20 @@ func runVM(
 
     if no_tracer == false {
         logs := tracer.StructLogs()
-        i := 0
-        loglen := len(logs)
         /* This loop stores the variables address, opcode, gas at every step
         of the execution as well as the final stack state, for later
         retrieval by the fuzzer.
         */
         for _, t := range logs {
-            i++
-
-            /* Set g_stack to the final stack state */
-            if i == loglen {
-                for _, t2 := range t.Stack {
-                    g_stack = append(g_stack, *t2)
-                }
-            }
             g_addresses = append(g_addresses, t.Pc)
             var o = uint64(t.Op)
             g_opcodes = append(g_opcodes, o)
             g_gases = append(g_gases, t.Gas)
+        }
+
+        /* Set g_stack to the final stack state */
+        for _, s := range vmlogger.LastStack {
+            g_stack = append(g_stack, *s)
         }
 
         /* Print address, opcode, gas at every step of the execution
