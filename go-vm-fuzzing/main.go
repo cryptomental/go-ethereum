@@ -33,8 +33,13 @@ func GoResetCoverage() {
 }
 
 //export GoCalcCoverage
-func GoCalcCoverage() int {
+func GoCalcCoverage() uint64 {
     return fuzz_helper.CalcCoverage()
+}
+
+//export MergeMode
+func MergeMode() {
+    fuzz_helper.MergeMode()
 }
 
 type account struct{}
