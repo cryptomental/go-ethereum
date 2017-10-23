@@ -16,6 +16,7 @@ import (
 )
 
 var LastStack []*big.Int
+var PrevLastStack []*big.Int
 
 type Storage map[common.Hash]common.Hash
 
@@ -143,12 +144,14 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 	}
 	fuzz_helper.AddCoverage(11919)
 
+    var stck []*big.Int
 	if !l.cfg.DisableStack {
+        PrevLastStack = LastStack
 		fuzz_helper.AddCoverage(45727)
-		LastStack = make([]*big.Int, len(stack.Data()))
+        LastStack = make([]*big.Int, len(stack.Data()))
 		for i, item := range stack.Data() {
 			fuzz_helper.AddCoverage(50494)
-			LastStack[i] = new(big.Int).Set(item)
+            LastStack[i] = new(big.Int).Set(item)
 		}
 	} else {
 		fuzz_helper.AddCoverage(22109)
@@ -178,10 +181,9 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 	}
 	fuzz_helper.AddCoverage(51530)
 
-	var stck []*big.Int
-	log := StructLog{pc, op, gas, cost, mem, memory.Len(), stck, storage, depth, err}
+    log := StructLog{pc, op, gas, cost, mem, memory.Len(), stck, storage, depth, err}
+    l.logs = append(l.logs, log)
 
-	l.logs = append(l.logs, log)
 	return nil
 }
 

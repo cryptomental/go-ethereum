@@ -100,6 +100,7 @@ var g_addresses = make([]uint64, 0)
 var g_opcodes = make([]uint64, 0)
 var g_gases = make([]uint64, 0)
 var g_trace_idx int;
+var g_gastrace_idx int;
 
 var g_stack = make([](big.Int), 0);
 var g_stack_idx int;
@@ -108,7 +109,7 @@ var g_stack_idx int;
    after a run.
 */
 //export getTrace
-func getTrace(finished *int, address *uint64, opcode *uint64, gas *uint64 ) {
+func getTrace(finished *int, address *uint64, opcode *uint64 ) {
     if g_trace_idx >= len(g_addresses) {
         /* Reset to 0 so getTrace may be called again */
         g_trace_idx = 0
@@ -120,10 +121,29 @@ func getTrace(finished *int, address *uint64, opcode *uint64, gas *uint64 ) {
 
     *address = g_addresses[g_trace_idx]
     *opcode = g_opcodes[g_trace_idx]
-    *gas = g_gases[g_trace_idx]
 
     *finished = 0
     g_trace_idx++
+}
+
+/* This function is called by the fuzzer to retrieve the gas trace
+   after a run.
+*/
+//export getGasTrace
+func getGasTrace(finished *int, gas *uint64 ) {
+    if g_gastrace_idx >= len(g_gases) {
+        /* Reset to 0 so getTrace may be called again */
+        g_gastrace_idx = 0
+
+        /* Signal to the fuzzer that it has retrieved all trace items */
+        *finished = 1
+        return
+    }
+
+    *gas = g_gases[g_gastrace_idx]
+
+    *finished = 0
+    g_gastrace_idx++
 }
 
 /* This function is called by the fuzzer to retrieve the final stack state
@@ -169,6 +189,7 @@ func runVM(
     g_opcodes = nil
     g_gases = nil
     g_trace_idx = 0
+    g_gastrace_idx = 0
 
     g_stack = nil
     g_stack_idx = 0
@@ -234,6 +255,9 @@ func runVM(
 	contract := vm.NewContract(account{}, account{}, big.NewInt(c_balance), gas)
 	contract.Code = input
 
+    vmlogger.LastStack = nil
+    vmlogger.PrevLastStack = nil
+
     /* Execute the byte code */
     _, err := env.Interpreter().Run(0, contract, []byte{})
 
@@ -260,22 +284,40 @@ func runVM(
         retrieval by the fuzzer.
         */
         logsLen := len(logs)
+        prevOp := uint64(0)
+        prevPc := uint64(0)
         for j, t := range logs {
 
-            /* Don't include the last gas trace item if there was an error,
-             * to match Parity's tracing behavior in these instances.
-             */
-            if !(err != nil && j + 1 == logsLen) {
-                g_addresses = append(g_addresses, t.Pc)
-                var o = uint64(t.Op)
-                g_opcodes = append(g_opcodes, o)
-                g_gases = append(g_gases, t.Gas)
-            }
+            /* The following logic is required to match Parity's logger behavior */
+
+             var o = uint64(t.Op)
+             /* Do not log REVERT twice or more in a row */
+             if !(o == 0xFD && o == prevOp && t.Pc == prevPc) {
+                 g_opcodes = append(g_opcodes, o)
+                 g_addresses = append(g_addresses, t.Pc)
+             }
+
+             /* Do not log the last item in case of an error */
+             if  !(err != nil && j + 1 == logsLen) {
+                 /* Do not log REVERT twice or more in a row */
+                 if !(o == 0xFD && o == prevOp && t.Pc == prevPc) {
+                     g_gases = append(g_gases, t.Gas)
+                 }
+             }
+
+             prevOp = o
+             prevPc = t.Pc
         }
 
         /* Set g_stack to the final stack state */
-        for _, s := range vmlogger.LastStack {
-            g_stack = append(g_stack, *s)
+        if err == nil {
+            for _, s := range vmlogger.LastStack {
+                g_stack = append(g_stack, *s)
+            }
+        } else {
+            for _, s := range vmlogger.PrevLastStack {
+                g_stack = append(g_stack, *s)
+            }
         }
 
         /* Print address, opcode, gas at every step of the execution

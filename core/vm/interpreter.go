@@ -251,8 +251,7 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		if in.cfg.Debug {
 			fuzz_helper.AddCoverage(21358)
             if err == nil {
-    			in.cfg.Tracer.CaptureState(in.evm, oldpc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
-                logged = true
+                in.cfg.Tracer.CaptureState(in.evm, oldpc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
             }
 		} else {
 			fuzz_helper.AddCoverage(8695)
