@@ -40,6 +40,7 @@ type LogConfig struct {
 	DisableStorage bool
 	FullStorage    bool
 	Limit          int
+	LogStack       bool
 }
 
 //go:generate gencodec -type StructLog -field-override structLogMarshaling -out gen_structlog.go
@@ -149,9 +150,15 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
         PrevLastStack = LastStack
 		fuzz_helper.AddCoverage(45727)
         LastStack = make([]*big.Int, len(stack.Data()))
+        if l.cfg.LogStack {
+            stck = make([]*big.Int, len(stack.Data()))
+        }
 		for i, item := range stack.Data() {
 			fuzz_helper.AddCoverage(50494)
             LastStack[i] = new(big.Int).Set(item)
+            if l.cfg.LogStack {
+                stck[i] = new(big.Int).Set(item)
+            }
 		}
 	} else {
 		fuzz_helper.AddCoverage(22109)

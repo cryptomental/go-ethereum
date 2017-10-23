@@ -239,8 +239,13 @@ func runVM(
 		GasPrice:   new(big.Int).SetUint64(gasprice),
 	}
 
+    logStack := false
+    if do_trace != 0 {
+        logStack = true
+    }
 	logger_config := &vm.LogConfig{
         DisableStack: false,
+        LogStack: logStack,
         DisableStorage: true,
         FullStorage: false,
         Limit: 0,
