@@ -237,16 +237,16 @@ func runVM(
     /* Execute the byte code */
     _, err := env.Interpreter().Run(0, contract, []byte{})
 
-    executionReverted := false
+    if err != nil {
+        errStr := fmt.Sprintf("%v", err)
+        if errStr == "evm: execution reverted" {
+            err = nil
+        }
+    }
     if err == nil {
         *success = 1
     } else {
-
         /* Determine whether the error is caused by a REVERT */
-        errStr := fmt.Sprintf("%v", err)
-        if errStr == "evm: execution reverted" {
-            executionReverted = true
-        }
         if do_trace != 0 {
             fmt.Printf("err is %v\n", err);
         }
@@ -262,11 +262,10 @@ func runVM(
         logsLen := len(logs)
         for j, t := range logs {
 
-            /* Don't include the last gas trace item if there was an error --
-             * except if the error was a REVERT.
-             * To match Parity's tracing behavior in these instances.
+            /* Don't include the last gas trace item if there was an error,
+             * to match Parity's tracing behavior in these instances.
              */
-            if !(err != nil && executionReverted == false && j + 1 == logsLen) {
+            if !(err != nil && j + 1 == logsLen) {
                 g_addresses = append(g_addresses, t.Pc)
                 var o = uint64(t.Op)
                 g_opcodes = append(g_opcodes, o)
