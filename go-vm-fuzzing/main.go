@@ -16,7 +16,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/params"
 )
-
 var no_tracer bool;
 
 //export SetInstrumentationType
@@ -238,9 +237,16 @@ func runVM(
     /* Execute the byte code */
     _, err := env.Interpreter().Run(0, contract, []byte{})
 
+    executionReverted := false
     if err == nil {
         *success = 1
     } else {
+
+        /* Determine whether the error is caused by a REVERT */
+        errStr := fmt.Sprintf("%v", err)
+        if errStr == "evm: execution reverted" {
+            executionReverted = true
+        }
         if do_trace != 0 {
             fmt.Printf("err is %v\n", err);
         }
@@ -253,11 +259,19 @@ func runVM(
         of the execution as well as the final stack state, for later
         retrieval by the fuzzer.
         */
-        for _, t := range logs {
-            g_addresses = append(g_addresses, t.Pc)
-            var o = uint64(t.Op)
-            g_opcodes = append(g_opcodes, o)
-            g_gases = append(g_gases, t.Gas)
+        logsLen := len(logs)
+        for j, t := range logs {
+
+            /* Don't include the last gas trace item if there was an error --
+             * except if the error was a REVERT.
+             * To match Parity's tracing behavior in these instances.
+             */
+            if !(err != nil && executionReverted == false && j + 1 == logsLen) {
+                g_addresses = append(g_addresses, t.Pc)
+                var o = uint64(t.Op)
+                g_opcodes = append(g_opcodes, o)
+                g_gases = append(g_gases, t.Gas)
+            }
         }
 
         /* Set g_stack to the final stack state */
