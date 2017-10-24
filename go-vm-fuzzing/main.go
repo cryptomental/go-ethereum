@@ -26,6 +26,11 @@ func SetInstrumentationType(t int) {
     fuzz_helper.SetInstrumentationType(t)
 }
 
+//export DisableTracer
+func DisableTracer() {
+    no_tracer = true;
+}
+
 //export GoResetCoverage
 func GoResetCoverage() {
     fuzz_helper.ResetCoverage()
