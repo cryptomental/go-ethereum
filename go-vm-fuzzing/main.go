@@ -293,35 +293,16 @@ func runVM(
         of the execution as well as the final stack state, for later
         retrieval by the fuzzer.
         */
-        logsLen := len(logs)
-        prevOp := uint64(0)
-        prevPc := uint64(0)
-        for j, t := range logs {
-
-            /* The following logic is required to match Parity's logger behavior */
-
+        for _, t := range logs {
              var o = uint64(t.Op)
-             /* Do not log REVERT twice or more in a row */
-             if !(o == 0xFD && o == prevOp && t.Pc == prevPc) {
-                 g_opcodes = append(g_opcodes, o)
-                 g_addresses = append(g_addresses, t.Pc)
-             }
-
-             /* Do not log the last item in case of an error */
-             if  !(err != nil && j + 1 == logsLen) {
-                 /* Do not log REVERT twice or more in a row */
-                 if !(o == 0xFD && o == prevOp && t.Pc == prevPc) {
-                     g_gases = append(g_gases, t.Gas)
-                 }
-             }
-
-             prevOp = o
-             prevPc = t.Pc
+             g_opcodes = append(g_opcodes, o)
+             g_addresses = append(g_addresses, t.Pc)
+             g_gases = append(g_gases, t.Gas)
         }
 
         /* Set g_stack to the final stack state */
         if err == nil {
-            for _, s := range vmlogger.LastStack {
+            for _, s := range vmlogger.PrevLastStack {
                 g_stack = append(g_stack, *s)
             }
         } else {
@@ -339,6 +320,7 @@ func runVM(
                 fmt.Printf("[%v] %v : %v\n", execution_num, t.Pc, t.Op)
                 fmt.Printf("Stack: %v\n", t.Stack)
                 fmt.Printf("Gas: %v\n", t.Gas)
+                fmt.Printf("Depth: %v\n", t.Depth)
 
                 execution_num++;
             }

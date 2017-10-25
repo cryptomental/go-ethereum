@@ -155,7 +155,7 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 
 	defer func() {
 		fuzz_helper.AddCoverage(53187)
-		if err != nil && in.cfg.Debug {
+		if err == nil && in.cfg.Debug {
 			fuzz_helper.AddCoverage(4556)
             if logged == false {
                 in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
@@ -173,6 +173,12 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
         }
         logged = false
 
+        oldStack := newstack()
+        for _, s := range(stack.data) {
+            oldStack.push(s)
+        }
+        gasCopy := uint64(contract.Gas)
+
 		op = contract.GetOp(pc)
 
 		operation := in.cfg.JumpTable[op]
@@ -180,6 +186,9 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 
 		if !operation.valid {
 			fuzz_helper.AddCoverage(60391)
+		    if in.cfg.Debug {
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+            }
 			return nil, fmt.Errorf("invalid opcode 0x%x", int(op))
 		} else {
 			fuzz_helper.AddCoverage(43288)
@@ -188,6 +197,9 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 
 		if err := operation.validateStack(stack); err != nil {
 			fuzz_helper.AddCoverage(64823)
+		    if in.cfg.Debug {
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+            }
 			return nil, err
 		} else {
 			fuzz_helper.AddCoverage(61834)
@@ -195,6 +207,9 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
         // If the operation is valid, enforce and write restrictions
         if err := in.enforceRestrictions(op, operation, stack); err != nil {
 			fuzz_helper.AddCoverage(61835)
+		    if in.cfg.Debug {
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+            }
             return nil, err
         }
 		fuzz_helper.AddCoverage(42112)
@@ -206,6 +221,9 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 			memSize, overflow := bigUint64(operation.memorySize(stack))
 			if overflow {
 				fuzz_helper.AddCoverage(43146)
+		        if in.cfg.Debug {
+                    in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+                }
 				return nil, errGasUintOverflow
 			} else {
 				fuzz_helper.AddCoverage(52720)
@@ -214,6 +232,9 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 
 			if memorySize, overflow = math.SafeMul(toWordSize(memSize), 32); overflow {
 				fuzz_helper.AddCoverage(58681)
+		        if in.cfg.Debug {
+                    in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+                }
 				return nil, errGasUintOverflow
 			} else {
 				fuzz_helper.AddCoverage(61396)
@@ -229,6 +250,9 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 			cost, err = operation.gasCost(in.gasTable, in.evm, contract, stack, mem, memorySize)
 			if err != nil || !contract.UseGas(cost) {
 				fuzz_helper.AddCoverage(12511)
+                if in.cfg.Debug {
+                    in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+                }
 				return nil, ErrOutOfGas
 			} else {
 				fuzz_helper.AddCoverage(35870)
@@ -245,17 +269,13 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		}
 		fuzz_helper.AddCoverage(33163)
 
-        oldpc := pc
+        if in.cfg.Debug {
+            in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, oldStack, contract, in.evm.depth, err)
+        }
+        //in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+        logged = true
 		res, err := operation.execute(&pc, in.evm, contract, mem, stack)
 
-		if in.cfg.Debug {
-			fuzz_helper.AddCoverage(21358)
-            if err == nil {
-                in.cfg.Tracer.CaptureState(in.evm, oldpc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
-            }
-		} else {
-			fuzz_helper.AddCoverage(8695)
-		}
 		fuzz_helper.AddCoverage(42178)
 
 
