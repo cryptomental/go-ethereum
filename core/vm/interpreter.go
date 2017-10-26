@@ -187,7 +187,7 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		if !operation.valid {
 			fuzz_helper.AddCoverage(60391)
 		    if in.cfg.Debug {
-                in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, oldStack, contract, in.evm.depth, err)
             }
 			return nil, fmt.Errorf("invalid opcode 0x%x", int(op))
 		} else {
@@ -198,7 +198,7 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		if err := operation.validateStack(stack); err != nil {
 			fuzz_helper.AddCoverage(64823)
 		    if in.cfg.Debug {
-                in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, oldStack, contract, in.evm.depth, err)
             }
 			return nil, err
 		} else {
@@ -208,7 +208,7 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
         if err := in.enforceRestrictions(op, operation, stack); err != nil {
 			fuzz_helper.AddCoverage(61835)
 		    if in.cfg.Debug {
-                in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, oldStack, contract, in.evm.depth, err)
             }
             return nil, err
         }
@@ -222,7 +222,7 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 			if overflow {
 				fuzz_helper.AddCoverage(43146)
 		        if in.cfg.Debug {
-                    in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, oldStack, contract, in.evm.depth, err)
                 }
 				return nil, errGasUintOverflow
 			} else {
@@ -233,7 +233,7 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 			if memorySize, overflow = math.SafeMul(toWordSize(memSize), 32); overflow {
 				fuzz_helper.AddCoverage(58681)
 		        if in.cfg.Debug {
-                    in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, oldStack, contract, in.evm.depth, err)
                 }
 				return nil, errGasUintOverflow
 			} else {
@@ -251,7 +251,7 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 			if err != nil || !contract.UseGas(cost) {
 				fuzz_helper.AddCoverage(12511)
                 if in.cfg.Debug {
-                    in.cfg.Tracer.CaptureState(in.evm, pc, op, contract.Gas, cost, mem, stack, contract, in.evm.depth, err)
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, oldStack, contract, in.evm.depth, err)
                 }
 				return nil, ErrOutOfGas
 			} else {
