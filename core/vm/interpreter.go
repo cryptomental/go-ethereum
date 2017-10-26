@@ -146,7 +146,7 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 	contract.Input = input
 
 	defer func() {
-		if err != nil && !logged && in.cfg.Debug {
+		if err == nil && !logged && in.cfg.Debug {
 			in.cfg.Tracer.CaptureState(in.evm, pcCopy, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
 		}
 	}()
@@ -156,6 +156,9 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 	// the execution of one of the operations or until the done flag is set by the
 	// parent context.
 	for atomic.LoadInt32(&in.evm.abort) == 0 {
+        if pc >= uint64(len(contract.Code)) {
+            break;
+        }
 		// Get the memory location of pc
 		op = contract.GetOp(pc)
 
@@ -173,13 +176,22 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		// stack and make sure there enough stack items available to perform the operation
 		operation := in.cfg.JumpTable[op]
 		if !operation.valid {
+            if in.cfg.Debug {
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+            }
 			return nil, fmt.Errorf("invalid opcode 0x%x", int(op))
 		}
 		if err := operation.validateStack(stack); err != nil {
+            if in.cfg.Debug {
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+            }
 			return nil, err
 		}
 		// If the operation is valid, enforce and write restrictions
 		if err := in.enforceRestrictions(op, operation, stack); err != nil {
+            if in.cfg.Debug {
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+            }
 			return nil, err
 		}
 
@@ -189,11 +201,17 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		if operation.memorySize != nil {
 			memSize, overflow := bigUint64(operation.memorySize(stack))
 			if overflow {
+                if in.cfg.Debug {
+                    in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+                }
 				return nil, errGasUintOverflow
 			}
 			// memory is expanded in words of 32 bytes. Gas
 			// is also calculated in words.
 			if memorySize, overflow = math.SafeMul(toWordSize(memSize), 32); overflow {
+                if in.cfg.Debug {
+                    in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+                }
 				return nil, errGasUintOverflow
 			}
 		}
@@ -203,6 +221,9 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 			// cost is explicitly set so that the capture state defer method cas get the proper cost
 			cost, err = operation.gasCost(in.gasTable, in.evm, contract, stack, mem, memorySize)
 			if err != nil || !contract.UseGas(cost) {
+                if in.cfg.Debug {
+                    in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+                }
 				return nil, ErrOutOfGas
 			}
 		}
