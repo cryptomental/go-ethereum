@@ -109,6 +109,14 @@ var g_trace_idx int;
 var g_gastrace_idx int;
 var g_msizetrace_idx int;
 
+type AccountData struct {
+    address uint64
+    balance uint64
+    code []byte
+}
+
+var g_accounts = make([]AccountData, 0)
+
 var g_stack = make([](big.Int), 0);
 var g_stack_idx int;
 
@@ -199,6 +207,17 @@ func getStack(finished *int, stackitem []byte) {
     g_stack_idx++
 }
 
+//export setAccounts
+func setAccounts(address uint64, balance uint64, code []byte) {
+    account := AccountData{
+        address: address,
+        balance: balance,
+        code : code,
+    }
+
+    g_accounts = append(g_accounts, account)
+}
+
 //export runVM
 func runVM(
     input []byte,
@@ -241,6 +260,14 @@ func runVM(
     addr = common.HexToAddress("0x4")
     statedb.SetBalance(addr, balance)
     */
+
+    for _, acc := range(g_accounts) {
+        addr := common.BigToAddress( new(big.Int).SetUint64(acc.address) )
+        statedb.SetBalance(addr, new(big.Int).SetUint64(acc.balance))
+        statedb.SetCode(addr, acc.code)
+    }
+
+    g_accounts = nil
 
 	root, _ := statedb.CommitTo(db, false)
 	statedb, _ = state.New(root, sdb)
