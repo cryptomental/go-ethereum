@@ -104,8 +104,10 @@ func FormatLogs(structLogs []vm.StructLog) []StructLogRes {
 var g_addresses = make([]uint64, 0)
 var g_opcodes = make([]uint64, 0)
 var g_gases = make([]uint64, 0)
+var g_msizes = make([]uint64, 0)
 var g_trace_idx int;
 var g_gastrace_idx int;
+var g_msizetrace_idx int;
 
 var g_stack = make([](big.Int), 0);
 var g_stack_idx int;
@@ -151,6 +153,26 @@ func getGasTrace(finished *int, gas *uint64 ) {
     g_gastrace_idx++
 }
 
+/* This function is called by the fuzzer to retrieve the gas trace
+   after a run.
+*/
+//export getMSizeTrace
+func getMSizeTrace(finished *int, msize *uint64 ) {
+    if g_msizetrace_idx >= len(g_msizes) {
+        /* Reset to 0 so getTrace may be called again */
+        g_msizetrace_idx = 0
+
+        /* Signal to the fuzzer that it has retrieved all trace items */
+        *finished = 1
+        return
+    }
+
+    *msize = g_msizes[g_msizetrace_idx]
+
+    *finished = 0
+    g_msizetrace_idx++
+}
+
 /* This function is called by the fuzzer to retrieve the final stack state
    after a run
 */
@@ -193,8 +215,10 @@ func runVM(
     g_addresses = nil
     g_opcodes = nil
     g_gases = nil
+    g_msizes = nil
     g_trace_idx = 0
     g_gastrace_idx = 0
+    g_msizetrace_idx = 0
 
     g_stack = nil
     g_stack_idx = 0
@@ -203,6 +227,7 @@ func runVM(
 	sdb := state.NewDatabase(db)
 	statedb, _ := state.New(common.Hash{}, sdb)
 
+    /*
     addr := common.HexToAddress("0x1")
     balance := new(big.Int).SetUint64(1);
     statedb.SetBalance(addr, balance)
@@ -215,6 +240,7 @@ func runVM(
 
     addr = common.HexToAddress("0x4")
     statedb.SetBalance(addr, balance)
+    */
 
 	root, _ := statedb.CommitTo(db, false)
 	statedb, _ = state.New(root, sdb)
@@ -254,7 +280,7 @@ func runVM(
         DisableStorage: true,
         FullStorage: false,
         Limit: 0,
-        DisableMemory: true,
+        DisableMemory: false,
 	}
     tracer := vm.NewStructLogger(logger_config)
     vm_config := vm.Config{Debug: true, Tracer: tracer}
@@ -289,7 +315,7 @@ func runVM(
 
     if no_tracer == false {
         logs := tracer.StructLogs()
-        /* This loop stores the variables address, opcode, gas at every step
+        /* This loop stores the variables address, opcode, gas, msize at every step
         of the execution as well as the final stack state, for later
         retrieval by the fuzzer.
         */
@@ -298,6 +324,7 @@ func runVM(
              g_opcodes = append(g_opcodes, o)
              g_addresses = append(g_addresses, t.Pc)
              g_gases = append(g_gases, t.Gas)
+             g_msizes = append(g_msizes, uint64(t.MemorySize))
         }
 
         /* Set g_stack to the final stack state */
@@ -315,6 +342,7 @@ func runVM(
                 fmt.Printf("Stack: %v\n", t.Stack)
                 fmt.Printf("Gas: %v\n", t.Gas)
                 fmt.Printf("Depth: %v\n", t.Depth)
+                fmt.Printf("Memory size: %v\n", t.MemorySize)
 
                 execution_num++;
             }
