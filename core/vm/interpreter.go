@@ -227,13 +227,13 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 				return nil, ErrOutOfGas
 			}
 		}
-		if memorySize > 0 {
-			mem.Resize(memorySize)
-		}
-
 		if in.cfg.Debug {
 			in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
 			logged = true
+		}
+
+		if memorySize > 0 {
+			mem.Resize(memorySize)
 		}
 
 		// execute the operation
