@@ -146,7 +146,7 @@ func (in *Interpreter) Run(contract *Contract, input []byte) (ret []byte, err er
 
 	defer func() {
 		if err == nil && !logged && in.cfg.Debug {
-			in.cfg.Tracer.CaptureState(in.evm, pcCopy, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+			in.cfg.Tracer.CaptureState(in.evm, pcCopy, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
 		}
 	}()
 
@@ -172,20 +172,20 @@ func (in *Interpreter) Run(contract *Contract, input []byte) (ret []byte, err er
 		operation := in.cfg.JumpTable[op]
 		if !operation.valid {
             if in.cfg.Debug {
-                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
             }
 			return nil, fmt.Errorf("invalid opcode 0x%x", int(op))
 		}
 		if err := operation.validateStack(stack); err != nil {
             if in.cfg.Debug {
-                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
             }
 			return nil, err
 		}
 		// If the operation is valid, enforce and write restrictions
 		if err := in.enforceRestrictions(op, operation, stack); err != nil {
             if in.cfg.Debug {
-                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+                in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
             }
 			return nil, err
 		}
@@ -197,7 +197,7 @@ func (in *Interpreter) Run(contract *Contract, input []byte) (ret []byte, err er
 			memSize, overflow := bigUint64(operation.memorySize(stack))
 			if overflow {
                 if in.cfg.Debug {
-                    in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+                    in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
                 }
 				return nil, errGasUintOverflow
 			}
@@ -205,7 +205,7 @@ func (in *Interpreter) Run(contract *Contract, input []byte) (ret []byte, err er
 			// is also calculated in words.
 			if memorySize, overflow = math.SafeMul(toWordSize(memSize), 32); overflow {
                 if in.cfg.Debug {
-                    in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+                    in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
                 }
 				return nil, errGasUintOverflow
 			}
@@ -217,7 +217,7 @@ func (in *Interpreter) Run(contract *Contract, input []byte) (ret []byte, err er
 			cost, err = operation.gasCost(in.gasTable, in.evm, contract, stack, mem, memorySize)
 			if err != nil || !contract.UseGas(cost) {
                 if in.cfg.Debug {
-                    in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+                    in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
                 }
 				return nil, ErrOutOfGas
 			}
