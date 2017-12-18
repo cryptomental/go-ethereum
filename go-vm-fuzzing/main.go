@@ -3,7 +3,7 @@ package main
 import "C"
 
 import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
-import vmlogger "github.com/ethereum/go-ethereum/core/vm_instrumented"
+import vmlogger "github.com/ethereum/go-ethereum/core/vm"
 
 import (
 	"math/big"
@@ -11,7 +11,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/vm_instrumented"
+	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/params"
@@ -312,7 +312,7 @@ func runVM(
         DisableStack: false,
         LogStack: logStack,
         DisableStorage: true,
-        FullStorage: false,
+        //FullStorage: false,
         Limit: 0,
         DisableMemory: false,
 	}
@@ -329,7 +329,7 @@ func runVM(
     vmlogger.PrevLastStack = nil
 
     /* Execute the byte code */
-    _, err := env.Interpreter().Run(0, contract, []byte{})
+    _, err := env.Interpreter().Run(contract, []byte{})
 
     if err != nil {
         errStr := fmt.Sprintf("%v", err)
