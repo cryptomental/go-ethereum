@@ -18,6 +18,15 @@ import (
 )
 var no_tracer bool;
 
+//export WriteSymcov
+func WriteSymcov(filename string) {
+    fuzz_helper.WriteSymcov(filename)
+}
+//export EnableSymcovWriter
+func EnableSymcovWriter() {
+    fuzz_helper.EnableSymcovWriter()
+}
+
 //export SetInstrumentationType
 func SetInstrumentationType(t int) {
     if t == 1 || t == 2 {
