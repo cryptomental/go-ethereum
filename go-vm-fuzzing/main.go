@@ -255,7 +255,6 @@ func runVM(
 	sdb := state.NewDatabase(db)
 	statedb, _ := state.New(common.Hash{}, sdb)
 
-    /*
     addr := common.HexToAddress("0x1")
     balance := new(big.Int).SetUint64(1);
     statedb.SetBalance(addr, balance)
@@ -268,7 +267,6 @@ func runVM(
 
     addr = common.HexToAddress("0x4")
     statedb.SetBalance(addr, balance)
-    */
 
     for _, acc := range(g_accounts) {
         addr := common.BigToAddress( new(big.Int).SetUint64(acc.address) )
