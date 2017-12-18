@@ -107,9 +107,9 @@ func (in *Interpreter) enforceRestrictions(op OpCode, operation operation, stack
 // the return byte-slice and an error if one occurred.
 //
 // It's important to note that any errors returned by the interpreter should be
-// considered a revert-and-consume-all-gas operation. No error specific checks
-// should be handled to reduce complexity and errors further down the in.
-func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret []byte, err error) {
+// considered a revert-and-consume-all-gas operation except for
+// errExecutionReverted which means revert-and-keep-gas-left.
+func (in *Interpreter) Run(contract *Contract, input []byte) (ret []byte, err error) {
 	// Increment the call depth which is restricted to 1024
 	in.evm.depth++
 	defer func() { in.evm.depth-- }()
@@ -138,10 +138,9 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		pc   = uint64(0) // program counter
 		cost uint64
 		// copies used by tracer
-		stackCopy = newstack() // stackCopy needed for Tracer since stack is mutated by 63/64 gas rule
-		pcCopy    uint64       // needed for the deferred Tracer
-		gasCopy   uint64       // for Tracer to log gas remaining before execution
-		logged    bool         // deferred Tracer should ignore already logged steps
+		pcCopy  uint64 // needed for the deferred Tracer
+		gasCopy uint64 // for Tracer to log gas remaining before execution
+		logged  bool   // deferred Tracer should ignore already logged steps
 	)
 	contract.Input = input
 
@@ -163,17 +162,13 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 		op = contract.GetOp(pc)
 
 		if in.cfg.Debug {
-			logged = false
-			pcCopy = pc
-			gasCopy = contract.Gas
-			stackCopy = newstack()
-			for _, val := range stack.data {
-				stackCopy.push(val)
-			}
+			// Capture pre-execution values for tracing.
+			logged, pcCopy, gasCopy = false, pc, contract.Gas
 		}
 
-		// Get the operation from the jump table matching the opcode and validate the
-		// stack and make sure there enough stack items available to perform the operation
+		// Get the operation from the jump table and validate the stack to ensure there are
+		// enough stack items available to perform the operation.
+		op = contract.GetOp(pc)
 		operation := in.cfg.JumpTable[op]
 		if !operation.valid {
             if in.cfg.Debug {
@@ -228,7 +223,7 @@ func (in *Interpreter) Run(snapshot int, contract *Contract, input []byte) (ret 
 			}
 		}
 		if in.cfg.Debug {
-			in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stackCopy, contract, in.evm.depth, err)
+			in.cfg.Tracer.CaptureState(in.evm, pc, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
 			logged = true
 		}
 
