@@ -26,6 +26,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
+
+	abi_fuzzing "github.com/ethereum/go-ethereum/abi-fuzzing"
 )
 
 var (
@@ -346,7 +348,14 @@ func opCallValue(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack
 }
 
 func opCallDataLoad(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	stack.push(new(big.Int).SetBytes(getDataBig(contract.Input, stack.pop(), big32)))
+    if abi_fuzzing.Enabled == false {
+        // Normal operation
+        stack.push(new(big.Int).SetBytes(getDataBig(contract.Input, stack.pop(), big32)))
+    } else {
+        a := stack.pop()
+        abi_fuzzing.AddCallDataLoad(a)
+        stack.push(new(big.Int).SetBytes(getDataBig(contract.Input, a, big32)))
+    }
 	return nil, nil
 }
 
