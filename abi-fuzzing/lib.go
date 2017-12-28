@@ -6,9 +6,12 @@ import "math/big"
 var g_calldataloads = make([]*big.Int, 0)
 
 var (
-    Enabled = true
+    Enabled = false
 )
 
+func EnableABIFuzzing() {
+    Enabled = true
+}
 
 func AddCallDataLoad(val *big.Int) {
     g_calldataloads = append(g_calldataloads, val)
