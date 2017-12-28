@@ -4,6 +4,7 @@ import "C"
 
 import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 import vmlogger "github.com/ethereum/go-ethereum/core/vm"
+import abi_fuzzing "github.com/ethereum/go-ethereum/abi-fuzzing"
 
 import (
 	"math/big"
@@ -114,9 +115,11 @@ var g_addresses = make([]uint64, 0)
 var g_opcodes = make([]uint64, 0)
 var g_gases = make([]uint64, 0)
 var g_msizes = make([]uint64, 0)
+var g_calldataloads = make([]*big.Int, 0)
 var g_trace_idx int;
 var g_gastrace_idx int;
 var g_msizetrace_idx int;
+var g_calldataloads_idx int;
 
 type AccountData struct {
     address uint64
@@ -216,6 +219,20 @@ func getStack(finished *int, stackitem []byte) {
     g_stack_idx++
 }
 
+//export getCallDataLoads
+func getCallDataLoads() *C.char {
+    if g_calldataloads_idx >= len(g_calldataloads) {
+        g_calldataloads_idx = 0
+        return nil
+    }
+
+    s := g_calldataloads[g_calldataloads_idx].String()
+
+    g_calldataloads_idx++
+
+    return C.CString(s)
+}
+
 //export setAccounts
 func setAccounts(address uint64, balance uint64, code []byte) {
     account := AccountData{
@@ -247,6 +264,11 @@ func runVM(
     g_trace_idx = 0
     g_gastrace_idx = 0
     g_msizetrace_idx = 0
+
+    if abi_fuzzing.Enabled == true {
+        g_calldataloads_idx = 0
+        g_calldataloads = nil
+    }
 
     g_stack = nil
     g_stack_idx = 0
@@ -381,6 +403,10 @@ func runVM(
                 execution_num++;
             }
         }
+    }
+
+    if abi_fuzzing.Enabled == true {
+        g_calldataloads = abi_fuzzing.GetCallDataLoads()
     }
 }
 
