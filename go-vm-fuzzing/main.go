@@ -233,6 +233,11 @@ func getCallDataLoads() *C.char {
     return C.CString(s)
 }
 
+//export EnableABIFuzzing
+func EnableABIFuzzing() {
+    abi_fuzzing.EnableABIFuzzing()
+}
+
 //export setAccounts
 func setAccounts(address uint64, balance uint64, code []byte) {
     account := AccountData{
