@@ -251,6 +251,7 @@ func setAccounts(address uint64, balance uint64, code []byte) {
 
 //export runVM
 func runVM(
+    code []byte,
     input []byte,
     success *int,
     do_trace int,
@@ -350,13 +351,13 @@ func runVM(
     }
     env := vm.NewEVM(context, statedb, params.TestnetChainConfig, vm_config)
 	contract := vm.NewContract(account{}, account{}, big.NewInt(c_balance), gas)
-	contract.Code = input
+	contract.Code = code
 
     vmlogger.LastStack = nil
     vmlogger.PrevLastStack = nil
 
     /* Execute the byte code */
-    _, err := env.Interpreter().Run(contract, []byte{})
+    _, err := env.Interpreter().Run(contract, input)
 
     if err != nil {
         errStr := fmt.Sprintf("%v", err)
