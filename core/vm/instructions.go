@@ -456,6 +456,9 @@ func opCallDataCopy(pc *uint64, interpreter *EVMInterpreter, contract *Contract,
 		dataOffset = stack.pop()
 		length     = stack.pop()
 	)
+    if abi_fuzzing.Enabled == true {
+        abi_fuzzing.AddCallDataLoad(dataOffset)
+    }
 	memory.Set(memOffset.Uint64(), length.Uint64(), getDataBig(contract.Input, dataOffset, length))
 
 	interpreter.intPool.put(memOffset, dataOffset, length)
