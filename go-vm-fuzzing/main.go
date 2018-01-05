@@ -272,6 +272,7 @@ func runVM(
     g_msizetrace_idx = 0
 
     if abi_fuzzing.Enabled == true {
+        abi_fuzzing.ResetCallDataLoads()
         g_calldataloads_idx = 0
         g_calldataloads = nil
     }

@@ -17,6 +17,10 @@ func AddCallDataLoad(val *big.Int) {
     g_calldataloads = append(g_calldataloads, val)
 }
 
+func ResetCallDataLoads() {
+    g_calldataloads = nil
+}
+
 func GetCallDataLoads() []*big.Int {
     return g_calldataloads
 }
