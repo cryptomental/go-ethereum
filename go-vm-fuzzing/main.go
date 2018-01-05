@@ -328,7 +328,7 @@ func runVM(
 		BlockNumber: new(big.Int).SetUint64(blocknumber),
 		Time:   new(big.Int).SetUint64(time),
 		Coinbase:   common.Address{},
-		GasLimit:   new(big.Int).SetUint64(gaslimit),
+		GasLimit:   gaslimit,
 		Difficulty:   new(big.Int).SetUint64(difficulty),
 		GasPrice:   new(big.Int).SetUint64(gasprice),
 	}
