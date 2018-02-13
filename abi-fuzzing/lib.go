@@ -14,7 +14,8 @@ func EnableABIFuzzing() {
 }
 
 func AddCallDataLoad(val *big.Int) {
-    g_calldataloads = append(g_calldataloads, val)
+    num := new(big.Int).Set(val)
+    g_calldataloads = append(g_calldataloads, num)
 }
 
 func ResetCallDataLoads() {
