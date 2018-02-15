@@ -353,7 +353,7 @@ func opCallDataLoad(pc *uint64, evm *EVM, contract *Contract, memory *Memory, st
         stack.push(new(big.Int).SetBytes(getDataBig(contract.Input, stack.pop(), big32)))
     } else {
         a := stack.pop()
-        abi_fuzzing.AddCallDataLoad(a)
+        abi_fuzzing.AddCallDataOp(0x35, big32, a, nil)
         stack.push(new(big.Int).SetBytes(getDataBig(contract.Input, a, big32)))
     }
 	return nil, nil
@@ -371,7 +371,7 @@ func opCallDataCopy(pc *uint64, evm *EVM, contract *Contract, memory *Memory, st
 		length     = stack.pop()
 	)
     if abi_fuzzing.Enabled == true {
-        abi_fuzzing.AddCallDataLoad(dataOffset)
+        abi_fuzzing.AddCallDataOp(0x37, length, dataOffset, memOffset)
     }
 	memory.Set(memOffset.Uint64(), length.Uint64(), getDataBig(contract.Input, dataOffset, length))
 

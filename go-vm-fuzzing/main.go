@@ -115,11 +115,10 @@ var g_addresses = make([]uint64, 0)
 var g_opcodes = make([]uint64, 0)
 var g_gases = make([]uint64, 0)
 var g_msizes = make([]uint64, 0)
-var g_calldataloads = make([]*big.Int, 0)
+var g_calldatavars = make([]abi_fuzzing.CallDataVars, 0)
 var g_trace_idx int;
 var g_gastrace_idx int;
 var g_msizetrace_idx int;
-var g_calldataloads_idx int;
 
 type AccountData struct {
     address uint64
@@ -219,16 +218,49 @@ func getStack(finished *int, stackitem []byte) {
     g_stack_idx++
 }
 
-//export getCallDataLoads
-func getCallDataLoads() *C.char {
-    if g_calldataloads_idx >= len(g_calldataloads) {
-        g_calldataloads_idx = 0
-        return nil
+//export getCallDataVarsSize
+func getCallDataVarsSize() int {
+    return len(g_calldatavars)
+}
+
+//export getCallDataOpcode
+func getCallDataOpcode(idx int) uint64 {
+    if idx < 0 || idx > len(g_calldatavars) {
+        panic("invalid calldatavar index")
     }
 
-    s := g_calldataloads[g_calldataloads_idx].String()
+    return g_calldatavars[idx].Opcode
+}
 
-    g_calldataloads_idx++
+//export getCallDataOffset
+func getCallDataOffset(idx int) *C.char {
+    if idx < 0 || idx > len(g_calldatavars) {
+        panic("invalid calldatavar index")
+    }
+
+    s := g_calldatavars[idx].Offset.String()
+
+    return C.CString(s)
+}
+
+//export getCallDataSize
+func getCallDataSize(idx int) *C.char {
+    if idx < 0 || idx > len(g_calldatavars) {
+        panic("invalid calldatavar index")
+    }
+
+    s := g_calldatavars[idx].Size.String()
+
+    return C.CString(s)
+}
+
+//export getCallDataTo
+func getCallDataTo(idx int) *C.char {
+    if idx < 0 || idx > len(g_calldatavars) {
+        panic("invalid calldatavar index")
+    }
+
+    s := g_calldatavars[idx].To.String()
 
     return C.CString(s)
 }
@@ -273,8 +305,7 @@ func runVM(
 
     if abi_fuzzing.Enabled == true {
         abi_fuzzing.ResetCallDataLoads()
-        g_calldataloads_idx = 0
-        g_calldataloads = nil
+        g_calldatavars = nil
     }
 
     g_stack = nil
@@ -413,7 +444,7 @@ func runVM(
     }
 
     if abi_fuzzing.Enabled == true {
-        g_calldataloads = abi_fuzzing.GetCallDataLoads()
+        g_calldatavars = abi_fuzzing.GetCallDataLoads()
     }
 }
 
