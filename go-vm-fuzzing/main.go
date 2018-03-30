@@ -336,7 +336,7 @@ func runVM(
 
     g_accounts = nil
 
-	root, _ := statedb.CommitTo(db, false)
+	root, _ := statedb.Commit(false)
 	statedb, _ = state.New(root, sdb)
 
     /* Helper functions required for correct functioning of the VM */
