@@ -58,6 +58,8 @@ func MergeMode() {
 
 type account struct{}
 
+var g_executingAddress common.Address;
+
 func (account) SubBalance(amount *big.Int)                          {}
 func (account) AddBalance(amount *big.Int)                          {}
 func (account) SetAddress(common.Address)                           {}
@@ -65,7 +67,7 @@ func (account) Value() *big.Int                                     { return nil
 func (account) SetBalance(*big.Int)                                 {}
 func (account) SetNonce(uint64)                                     {}
 func (account) Balance() *big.Int                                   { return nil }
-func (account) Address() common.Address                             { a := new(big.Int).SetUint64(0x155); return common.BigToAddress(a); }
+func (account) Address() common.Address                             { return g_executingAddress; }
 func (account) ReturnGas(*big.Int)                                  {}
 func (account) SetCode(common.Hash, []byte)                         {}
 func (account) ForEachStorage(cb func(key, value common.Hash) bool) {}
@@ -121,7 +123,7 @@ var g_gastrace_idx int;
 var g_msizetrace_idx int;
 
 type AccountData struct {
-    address uint64
+    address []byte
     balance uint64
     code []byte
 }
@@ -270,8 +272,8 @@ func EnableABIFuzzing() {
     abi_fuzzing.EnableABIFuzzing()
 }
 
-//export setAccounts
-func setAccounts(address uint64, balance uint64, code []byte) {
+//export addAccount
+func addAccount(address []byte, balance uint64, code []byte) {
     account := AccountData{
         address: address,
         balance: balance,
@@ -283,6 +285,7 @@ func setAccounts(address uint64, balance uint64, code []byte) {
 
 //export runVM
 func runVM(
+    executingAddress []byte,
     code []byte,
     input []byte,
     success *int,
@@ -302,6 +305,8 @@ func runVM(
     g_trace_idx = 0
     g_gastrace_idx = 0
     g_msizetrace_idx = 0
+
+    g_executingAddress = common.BytesToAddress(executingAddress)
 
     if abi_fuzzing.Enabled == true {
         abi_fuzzing.ResetCallDataLoads()
@@ -329,7 +334,7 @@ func runVM(
     statedb.SetBalance(addr, balance)
 
     for _, acc := range(g_accounts) {
-        addr := common.BigToAddress( new(big.Int).SetUint64(acc.address) )
+        addr := common.BytesToAddress( acc.address )
         statedb.SetBalance(addr, new(big.Int).SetUint64(acc.balance))
         statedb.SetCode(addr, acc.code)
     }
