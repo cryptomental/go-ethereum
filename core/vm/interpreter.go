@@ -237,9 +237,8 @@ func (in *Interpreter) Run(contract *Contract, input []byte) (ret []byte, err er
 			return res, errExecutionReverted
 		case operation.halts:
 			return res, nil
-		case !operation.jumps:
-			pc++
 		}
+		pc++
 	}
 	return nil, nil
 }

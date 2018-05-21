@@ -603,6 +603,8 @@ func opSstore(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *S
 }
 
 func opJump(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	stack.pop()
+	return nil, nil
 	pos := stack.pop()
 	if !contract.jumpdests.has(contract.CodeHash, contract.Code, pos) {
 		nop := contract.GetOp(pos.Uint64())
@@ -615,6 +617,9 @@ func opJump(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Sta
 }
 
 func opJumpi(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+	stack.pop()
+	stack.pop()
+	return nil, nil
 	pos, cond := stack.pop(), stack.pop()
 	if cond.Sign() != 0 {
 		if !contract.jumpdests.has(contract.CodeHash, contract.Code, pos) {
