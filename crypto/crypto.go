@@ -71,7 +71,30 @@ func Keccak512(data ...[]byte) []byte {
 // Creates an ethereum address given the bytes and the nonce
 func CreateAddress(b common.Address, nonce uint64) common.Address {
 	data, _ := rlp.EncodeToBytes([]interface{}{b, nonce})
-	return common.BytesToAddress(Keccak256(data)[12:])
+	addr := common.BytesToAddress(Keccak256(data)[12:])
+	addr[0] = 0
+	addr[1] = 0
+	addr[2] = 0
+	addr[3] = 0
+	addr[4] = 0
+	addr[5] = 0
+	addr[6] = 0
+	addr[7] = 0
+	addr[8] = 0
+	addr[9] = 0
+	addr[10] = 0
+	addr[11] = 0
+	addr[12] = 0
+	addr[13] = 0
+	addr[14] = 0
+	addr[15] = 0
+	addr[16] = 0
+	addr[17] = 0
+	addr[18] = 0
+	if addr[19] < 10 {
+		addr[19] = 10
+	}
+	return addr
 }
 
 // ToECDSA creates a private key with the given D value.
