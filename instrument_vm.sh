@@ -1,3 +1,5 @@
-GO_INSTRUMENT=/media/jhg/5c980a66-cf42-464d-878a-85016937237c/gopkg/src/github.com/guidovranken/go-coverage-instrumentation/instrument/main
+rm -rf core_instrumented
 mkdir core_instrumented
-$GO_INSTRUMENT core core_instrumented
+go run ../../../github.com/guidovranken/go-coverage-instrumentation/instrument/go-coverage-instrumenter.go core core_instrumented
+mv core core_uninstrumented
+mv core_instrumented core
