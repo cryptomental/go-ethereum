@@ -77,7 +77,6 @@ func NewInterpreter(evm *EVM, cfg Config) *Interpreter {
 		evm:      evm,
 		cfg:      cfg,
 		gasTable: evm.ChainConfig().GasTable(evm.BlockNumber),
-		intPool:  newIntPool(),
 	}
 }
 
@@ -104,6 +103,14 @@ func (in *Interpreter) enforceRestrictions(op OpCode, operation operation, stack
 // considered a revert-and-consume-all-gas operation except for
 // errExecutionReverted which means revert-and-keep-gas-left.
 func (in *Interpreter) Run(contract *Contract, input []byte) (ret []byte, err error) {
+	if in.intPool == nil {
+		in.intPool = poolOfIntPools.get()
+		defer func() {
+			poolOfIntPools.put(in.intPool)
+			in.intPool = nil
+		}()
+	}
+
 	// Increment the call depth which is restricted to 1024
 	in.evm.depth++
 	defer func() { in.evm.depth-- }()
@@ -134,6 +141,7 @@ func (in *Interpreter) Run(contract *Contract, input []byte) (ret []byte, err er
 	contract.Input = input
 
 	defer func() {
+        in.intPool.put(stack.data...)
 		if err == nil && !logged && in.cfg.Debug {
 			in.cfg.Tracer.CaptureState(in.evm, pcCopy, op, gasCopy, cost, mem, stack, contract, in.evm.depth, err)
 		}

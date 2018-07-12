@@ -33,7 +33,6 @@ import (
 var (
 	bigZero                  = new(big.Int)
 	tt255                    = math.BigPow(2, 255)
-	tt256                    = math.BigPow(2, 256)
 	errWriteProtection       = errors.New("evm: write protection")
 	errReturnDataOutOfBounds = errors.New("evm: return data out of bounds")
 	errExecutionReverted     = errors.New("evm: execution reverted")
@@ -569,7 +568,7 @@ func opMload(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *St
 func opMstore(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 	// pop value of the stack
 	mStart, val := stack.pop(), stack.pop()
-	memory.Set(mStart.Uint64(), 32, math.PaddedBigBytes(val, 32))
+	memory.Set32(mStart.Uint64(), val)
 
 	evm.interpreter.intPool.put(mStart, val)
 	return nil, nil
@@ -583,9 +582,9 @@ func opMstore8(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *
 }
 
 func opSload(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	loc := common.BigToHash(stack.pop())
-	val := evm.StateDB.GetState(contract.Address(), loc).Big()
-	stack.push(val)
+	loc := stack.peek()
+	val := evm.StateDB.GetState(contract.Address(), common.BigToHash(loc))
+	loc.SetBytes(val.Bytes())
 	return nil, nil
 }
 
@@ -863,7 +862,7 @@ func makePush(size uint64, pushByteSize int) executionFunc {
 	}
 }
 
-// make push instruction function
+// make dup instruction function
 func makeDup(size int64) executionFunc {
 	return func(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 		stack.dup(evm.interpreter.intPool, int(size))
@@ -874,7 +873,7 @@ func makeDup(size int64) executionFunc {
 // make swap instruction function
 func makeSwap(size int64) executionFunc {
 	// switch n + 1 otherwise n would be swapped with n
-	size += 1
+	size++
 	return func(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
 		stack.swap(int(size))
 		return nil, nil
