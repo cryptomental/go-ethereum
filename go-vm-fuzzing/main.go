@@ -7,15 +7,15 @@ import vmlogger "github.com/ethereum/go-ethereum/core/vm"
 import abi_fuzzing "github.com/ethereum/go-ethereum/abi-fuzzing"
 
 import (
-	"math/big"
-	"fmt"
+    "math/big"
+    "fmt"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/params"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/core/state"
+    "github.com/ethereum/go-ethereum/core/vm"
+    "github.com/ethereum/go-ethereum/ethdb"
+    "github.com/ethereum/go-ethereum/common/math"
+    "github.com/ethereum/go-ethereum/params"
 )
 var no_tracer bool;
 
@@ -73,44 +73,44 @@ func (account) SetCode(common.Hash, []byte)                         {}
 func (account) ForEachStorage(cb func(key, value common.Hash) bool) {}
 
 type StructLogRes struct {
-	Pc      uint64            `json:"pc"`
-	Op      string            `json:"op"`
-	Gas     uint64            `json:"gas"`
-	GasCost uint64            `json:"gasCost"`
-	Depth   int               `json:"depth"`
-	Error   error             `json:"error"`
-	Stack   []string          `json:"stack"`
-	Memory  []string          `json:"memory"`
-	Storage map[string]string `json:"storage"`
+    Pc      uint64            `json:"pc"`
+    Op      string            `json:"op"`
+    Gas     uint64            `json:"gas"`
+    GasCost uint64            `json:"gasCost"`
+    Depth   int               `json:"depth"`
+    Error   error             `json:"error"`
+    Stack   []string          `json:"stack"`
+    Memory  []string          `json:"memory"`
+    Storage map[string]string `json:"storage"`
 }
 
 func FormatLogs(structLogs []vm.StructLog) []StructLogRes {
-	formattedStructLogs := make([]StructLogRes, len(structLogs))
-	for index, trace := range structLogs {
-		formattedStructLogs[index] = StructLogRes{
-			Pc:      trace.Pc,
-			Op:      trace.Op.String(),
-			Gas:     trace.Gas,
-			GasCost: trace.GasCost,
-			Depth:   trace.Depth,
-			Error:   trace.Err,
-			Stack:   make([]string, len(trace.Stack)),
-			Storage: make(map[string]string),
-		}
+    formattedStructLogs := make([]StructLogRes, len(structLogs))
+    for index, trace := range structLogs {
+        formattedStructLogs[index] = StructLogRes{
+            Pc:      trace.Pc,
+            Op:      trace.Op.String(),
+            Gas:     trace.Gas,
+            GasCost: trace.GasCost,
+            Depth:   trace.Depth,
+            Error:   trace.Err,
+            Stack:   make([]string, len(trace.Stack)),
+            Storage: make(map[string]string),
+        }
 
-		for i, stackValue := range trace.Stack {
-			formattedStructLogs[index].Stack[i] = fmt.Sprintf("%x", math.PaddedBigBytes(stackValue, 32))
-		}
+        for i, stackValue := range trace.Stack {
+            formattedStructLogs[index].Stack[i] = fmt.Sprintf("%x", math.PaddedBigBytes(stackValue, 32))
+        }
 
-		for i := 0; i+32 <= len(trace.Memory); i += 32 {
-			formattedStructLogs[index].Memory = append(formattedStructLogs[index].Memory, fmt.Sprintf("%x", trace.Memory[i:i+32]))
-		}
+        for i := 0; i+32 <= len(trace.Memory); i += 32 {
+            formattedStructLogs[index].Memory = append(formattedStructLogs[index].Memory, fmt.Sprintf("%x", trace.Memory[i:i+32]))
+        }
 
-		for i, storageValue := range trace.Storage {
-			formattedStructLogs[index].Storage[fmt.Sprintf("%x", i)] = fmt.Sprintf("%x", storageValue)
-		}
-	}
-	return formattedStructLogs
+        for i, storageValue := range trace.Storage {
+            formattedStructLogs[index].Storage[fmt.Sprintf("%x", i)] = fmt.Sprintf("%x", storageValue)
+        }
+    }
+    return formattedStructLogs
 }
 
 var g_addresses = make([]uint64, 0)
@@ -317,8 +317,8 @@ func runVM(
     g_stack_idx = 0
 
     db := ethdb.NewMemDatabase()
-	sdb := state.NewDatabase(db)
-	statedb, _ := state.New(common.Hash{}, sdb)
+    sdb := state.NewDatabase(db)
+    statedb, _ := state.New(common.Hash{}, sdb)
 
     addr := common.HexToAddress("0x1")
     balance := new(big.Int).SetUint64(1);
@@ -341,13 +341,13 @@ func runVM(
 
     g_accounts = nil
 
-	root, _ := statedb.Commit(false)
-	statedb, _ = state.New(root, sdb)
+    root, _ := statedb.Commit(false)
+    statedb, _ = state.New(root, sdb)
 
     /* Helper functions required for correct functioning of the VM */
-	canTransfer := func(db vm.StateDB, address common.Address, amount *big.Int) bool {
+    canTransfer := func(db vm.StateDB, address common.Address, amount *big.Int) bool {
         return db.GetBalance(address).Cmp(amount) >= 0
-	}
+    }
     transfer := func(db vm.StateDB, sender, recipient common.Address, amount *big.Int) {
         db.SubBalance(sender, amount)
         db.AddBalance(recipient, amount)
@@ -373,22 +373,22 @@ func runVM(
     if do_trace != 0 {
         logStack = true
     }
-	logger_config := &vm.LogConfig{
+    logger_config := &vm.LogConfig{
         DisableStack: false,
         LogStack: logStack,
         DisableStorage: true,
         //FullStorage: false,
         Limit: 0,
         DisableMemory: false,
-	}
+    }
     tracer := vm.NewStructLogger(logger_config)
     vm_config := vm.Config{Debug: true, Tracer: tracer}
     if no_tracer == true  {
         vm_config = vm.Config{}
     }
     env := vm.NewEVM(context, statedb, params.TestnetChainConfig, vm_config)
-	contract := vm.NewContract(account{}, account{}, big.NewInt(c_balance), gas)
-	contract.Code = code
+    contract := vm.NewContract(account{}, account{}, big.NewInt(c_balance), gas)
+    contract.Code = code
 
     vmlogger.LastStack = nil
     vmlogger.PrevLastStack = nil
