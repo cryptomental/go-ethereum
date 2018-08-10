@@ -316,7 +316,7 @@ func runVM(
     g_stack = nil
     g_stack_idx = 0
 
-	db, _ := ethdb.NewMemDatabase()
+    db := ethdb.NewMemDatabase()
 	sdb := state.NewDatabase(db)
 	statedb, _ := state.New(common.Hash{}, sdb)
 
