@@ -413,7 +413,7 @@ func opCallValue(pc *uint64, interpreter *EVMInterpreter, contract *Contract, me
 	return nil, nil
 }
 
-func opCallDataLoad(pc *uint64, evm *EVM, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
+func opCallDataLoad(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
     if abi_fuzzing.Enabled == false {
         // Normal operation
         stack.push(interpreter.intPool.get().SetBytes(getDataBig(contract.Input, stack.pop(), big32)))
