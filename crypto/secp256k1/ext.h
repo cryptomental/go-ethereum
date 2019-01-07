@@ -7,7 +7,7 @@ static xsecp256k1_context* xsecp256k1_context_create_sign_verify() {
 	return xsecp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
 }
 
-// xsecp256k1_ecdsa_recover_pubkey recovers the public key of an encoded compact signature.
+// xsecp256k1_ext_ecdsa_recover recovers the public key of an encoded compact signature.
 //
 // Returns: 1: recovery was successful
 //          0: recovery was not successful
@@ -15,7 +15,7 @@ static xsecp256k1_context* xsecp256k1_context_create_sign_verify() {
 //  Out:    pubkey_out: the serialized 65-byte public key of the signer (cannot be NULL)
 //  In:     sigdata:    pointer to a 65-byte signature with the recovery id at the end (cannot be NULL)
 //          msgdata:    pointer to a 32-byte message (cannot be NULL)
-static int xsecp256k1_ecdsa_recover_pubkey(
+static int xsecp256k1_ext_ecdsa_recover(
 	const xsecp256k1_context* ctx,
 	unsigned char *pubkey_out,
 	const unsigned char *sigdata,
@@ -34,7 +34,62 @@ static int xsecp256k1_ecdsa_recover_pubkey(
 	return xsecp256k1_ec_pubkey_serialize(ctx, pubkey_out, &outputlen, &pubkey, SECP256K1_EC_UNCOMPRESSED);
 }
 
-// xsecp256k1_pubkey_scalar_mul multiplies a point by a scalar in constant time.
+// xsecp256k1_ext_ecdsa_verify verifies an encoded compact signature.
+//
+// Returns: 1: signature is valid
+//          0: signature is invalid
+// Args:    ctx:        pointer to a context object (cannot be NULL)
+//  In:     sigdata:    pointer to a 64-byte signature (cannot be NULL)
+//          msgdata:    pointer to a 32-byte message (cannot be NULL)
+//          pubkeydata: pointer to public key data (cannot be NULL)
+//          pubkeylen:  length of pubkeydata
+static int xsecp256k1_ext_ecdsa_verify(
+	const xsecp256k1_context* ctx,
+	const unsigned char *sigdata,
+	const unsigned char *msgdata,
+	const unsigned char *pubkeydata,
+	size_t pubkeylen
+) {
+	xsecp256k1_ecdsa_signature sig;
+	xsecp256k1_pubkey pubkey;
+
+	if (!xsecp256k1_ecdsa_signature_parse_compact(ctx, &sig, sigdata)) {
+		return 0;
+	}
+	if (!xsecp256k1_ec_pubkey_parse(ctx, &pubkey, pubkeydata, pubkeylen)) {
+		return 0;
+	}
+	return xsecp256k1_ecdsa_verify(ctx, &sig, msgdata, &pubkey);
+}
+
+// xsecp256k1_ext_reencode_pubkey decodes then encodes a public key. It can be used to
+// convert between public key formats. The input/output formats are chosen depending on the
+// length of the input/output buffers.
+//
+// Returns: 1: conversion successful
+//          0: conversion unsuccessful
+// Args:    ctx:        pointer to a context object (cannot be NULL)
+//  Out:    out:        output buffer that will contain the reencoded key (cannot be NULL)
+//  In:     outlen:     length of out (33 for compressed keys, 65 for uncompressed keys)
+//          pubkeydata: the input public key (cannot be NULL)
+//          pubkeylen:  length of pubkeydata
+static int xsecp256k1_ext_reencode_pubkey(
+	const xsecp256k1_context* ctx,
+	unsigned char *out,
+	size_t outlen,
+	const unsigned char *pubkeydata,
+	size_t pubkeylen
+) {
+	xsecp256k1_pubkey pubkey;
+
+	if (!xsecp256k1_ec_pubkey_parse(ctx, &pubkey, pubkeydata, pubkeylen)) {
+		return 0;
+	}
+	unsigned int flag = (outlen == 33) ? SECP256K1_EC_COMPRESSED : SECP256K1_EC_UNCOMPRESSED;
+	return xsecp256k1_ec_pubkey_serialize(ctx, out, &outlen, &pubkey, flag);
+}
+
+// xsecp256k1_ext_scalar_mul multiplies a point by a scalar in constant time.
 //
 // Returns: 1: multiplication was successful
 //          0: scalar was invalid (zero or overflow)
@@ -43,7 +98,7 @@ static int xsecp256k1_ecdsa_recover_pubkey(
 //  In:     point:    pointer to a 64-byte public point,
 //                    encoded as two 256bit big-endian numbers.
 //          scalar:   a 32-byte scalar with which to multiply the point
-int xsecp256k1_pubkey_scalar_mul(const xsecp256k1_context* ctx, unsigned char *point, const unsigned char *scalar) {
+int xsecp256k1_ext_scalar_mul(const xsecp256k1_context* ctx, unsigned char *point, const unsigned char *scalar) {
 	int ret = 0;
 	int overflow = 0;
 	xsecp256k1_fe feX, feY;

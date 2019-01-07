@@ -40,7 +40,7 @@ import (
 
 /*
 #include "libsecp256k1/include/secp256k1.h"
-extern int xsecp256k1_pubkey_scalar_mul(const xsecp256k1_context* ctx, const unsigned char *point, const unsigned char *scalar);
+extern int xsecp256k1_ext_scalar_mul(const xsecp256k1_context* ctx, const unsigned char *point, const unsigned char *scalar);
 */
 import "C"
 
@@ -256,7 +256,7 @@ func (BitCurve *BitCurve) ScalarMult(Bx, By *big.Int, scalar []byte) (*big.Int, 
 
 	pointPtr := (*C.uchar)(unsafe.Pointer(&point[0]))
 	scalarPtr := (*C.uchar)(unsafe.Pointer(&scalar[0]))
-	res := C.xsecp256k1_pubkey_scalar_mul(context, pointPtr, scalarPtr)
+	res := C.xsecp256k1_ext_scalar_mul(context, pointPtr, scalarPtr)
 
 	// Unpack the result and clear temporaries.
 	x := new(big.Int).SetBytes(point[:32])

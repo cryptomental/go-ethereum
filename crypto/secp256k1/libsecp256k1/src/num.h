@@ -54,7 +54,7 @@ static void xsecp256k1_num_mul(xsecp256k1_num *r, const xsecp256k1_num *a, const
     even if r was negative. */
 static void xsecp256k1_num_mod(xsecp256k1_num *r, const xsecp256k1_num *m);
 
-/** Right-shift the passed number by bits. */
+/** Right-shift the passed number by bits bits. */
 static void xsecp256k1_num_shift(xsecp256k1_num *r, int bits);
 
 /** Check whether a number is zero. */

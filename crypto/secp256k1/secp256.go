@@ -86,7 +86,7 @@ func Sign(msg []byte, seckey []byte) ([]byte, error) {
 	return sig, nil
 }
 
-// RecoverPubkey returns the public key of the signer.
+// RecoverPubkey returns the the public key of the signer.
 // msg must be the 32-byte hash of the message to be signed.
 // sig must be a 65-byte compact ECDSA signature containing the
 // recovery id as the last element.
@@ -103,7 +103,7 @@ func RecoverPubkey(msg []byte, sig []byte) ([]byte, error) {
 		sigdata = (*C.uchar)(unsafe.Pointer(&sig[0]))
 		msgdata = (*C.uchar)(unsafe.Pointer(&msg[0]))
 	)
-	if C.xsecp256k1_ecdsa_recover_pubkey(context, (*C.uchar)(unsafe.Pointer(&pubkey[0])), sigdata, msgdata) == 0 {
+	if C.xsecp256k1_ext_ecdsa_recover(context, (*C.uchar)(unsafe.Pointer(&pubkey[0])), sigdata, msgdata) == 0 {
 		return nil, ErrRecoverFailed
 	}
 	return pubkey, nil
