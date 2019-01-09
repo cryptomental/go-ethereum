@@ -29,6 +29,9 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
+var LastStack []*big.Int
+var PrevLastStack []*big.Int
+
 // Storage represents a contract's storage.
 type Storage map[common.Hash]common.Hash
 
@@ -49,6 +52,7 @@ type LogConfig struct {
 	DisableStorage bool // disable storage capture
 	Debug          bool // print output during capture end
 	Limit          int  // maximum length of output, but zero means unlimited
+	LogStack       bool
 }
 
 //go:generate gencodec -type StructLog -field-override structLogMarshaling -out gen_structlog.go
@@ -167,9 +171,16 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 	// Copy a snapshot of the current stack state to a new buffer
 	var stck []*big.Int
 	if !l.cfg.DisableStack {
-		stck = make([]*big.Int, len(stack.Data()))
+        PrevLastStack = LastStack
+        LastStack = make([]*big.Int, len(stack.Data()))
+        if l.cfg.LogStack {
+            stck = make([]*big.Int, len(stack.Data()))
+        }
 		for i, item := range stack.Data() {
-			stck[i] = new(big.Int).Set(item)
+            LastStack[i] = new(big.Int).Set(item)
+            if l.cfg.LogStack {
+                stck[i] = new(big.Int).Set(item)
+            }
 		}
 	}
 	// Copy a snapshot of the current storage to a new container

@@ -7,7 +7,7 @@
 #define USE_BASIC_CONFIG 1
 
 #include "basic-config.h"
-#include "include/secp256k1.h"
+#include "include/xsecp256k1.h"
 #include "field_impl.h"
 #include "scalar_impl.h"
 #include "group_impl.h"
@@ -15,17 +15,17 @@
 
 static void default_error_callback_fn(const char* str, void* data) {
     (void)data;
-    fprintf(stderr, "[libsecp256k1] internal consistency check failed: %s\n", str);
+    fprintf(stderr, "[libxsecp256k1] internal consistency check failed: %s\n", str);
     abort();
 }
 
-static const secp256k1_callback default_error_callback = {
+static const xsecp256k1_callback default_error_callback = {
     default_error_callback_fn,
     NULL
 };
 
 int main(int argc, char **argv) {
-    secp256k1_ecmult_gen_context ctx;
+    xsecp256k1_ecmult_gen_context ctx;
     int inner;
     int outer;
     FILE* fp;
@@ -43,10 +43,10 @@ int main(int argc, char **argv) {
     fprintf(fp, "#define _SECP256K1_ECMULT_STATIC_CONTEXT_\n");
     fprintf(fp, "#include \"group.h\"\n");
     fprintf(fp, "#define SC SECP256K1_GE_STORAGE_CONST\n");
-    fprintf(fp, "static const secp256k1_ge_storage secp256k1_ecmult_static_context[64][16] = {\n");
+    fprintf(fp, "static const xsecp256k1_ge_storage xsecp256k1_ecmult_static_context[64][16] = {\n");
 
-    secp256k1_ecmult_gen_context_init(&ctx);
-    secp256k1_ecmult_gen_context_build(&ctx, &default_error_callback);
+    xsecp256k1_ecmult_gen_context_init(&ctx);
+    xsecp256k1_ecmult_gen_context_build(&ctx, &default_error_callback);
     for(outer = 0; outer != 64; outer++) {
         fprintf(fp,"{\n");
         for(inner = 0; inner != 16; inner++) {
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
         }
     }
     fprintf(fp,"};\n");
-    secp256k1_ecmult_gen_context_clear(&ctx);
+    xsecp256k1_ecmult_gen_context_clear(&ctx);
     
     fprintf(fp, "#undef SC\n");
     fprintf(fp, "#endif\n");

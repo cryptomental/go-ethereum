@@ -25,6 +25,8 @@ import (
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
+
+	abi_fuzzing "github.com/ethereum/go-ethereum/abi-fuzzing"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -431,7 +433,14 @@ func opCallValue(pc *uint64, interpreter *EVMInterpreter, contract *Contract, me
 }
 
 func opCallDataLoad(pc *uint64, interpreter *EVMInterpreter, contract *Contract, memory *Memory, stack *Stack) ([]byte, error) {
-	stack.push(interpreter.intPool.get().SetBytes(getDataBig(contract.Input, stack.pop(), big32)))
+    if abi_fuzzing.Enabled == false {
+        // Normal operation
+        stack.push(interpreter.intPool.get().SetBytes(getDataBig(contract.Input, stack.pop(), big32)))
+    } else {
+        a := stack.pop()
+        abi_fuzzing.AddCallDataOp(0x35, big32, a, nil)
+        stack.push(new(big.Int).SetBytes(getDataBig(contract.Input, a, big32)))
+    }
 	return nil, nil
 }
 
@@ -446,6 +455,9 @@ func opCallDataCopy(pc *uint64, interpreter *EVMInterpreter, contract *Contract,
 		dataOffset = stack.pop()
 		length     = stack.pop()
 	)
+    if abi_fuzzing.Enabled == true {
+        abi_fuzzing.AddCallDataOp(0x37, length, dataOffset, memOffset)
+    }
 	memory.Set(memOffset.Uint64(), length.Uint64(), getDataBig(contract.Input, dataOffset, length))
 
 	interpreter.intPool.put(memOffset, dataOffset, length)
