@@ -394,7 +394,7 @@ func runVM(
     vmlogger.PrevLastStack = nil
 
     /* Execute the byte code */
-    _, err := env.Interpreter().Run(contract, input)
+    _, err := env.Interpreter().Run(contract, input, false)
 
     if err != nil {
         errStr := fmt.Sprintf("%v", err)
