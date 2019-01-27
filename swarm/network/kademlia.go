@@ -27,6 +27,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/swarm/log"
 	"github.com/ethereum/go-ethereum/swarm/pot"
+	sv "github.com/ethereum/go-ethereum/swarm/version"
 )
 
 /*
@@ -279,7 +280,7 @@ func (k *Kademlia) SuggestPeer() (suggestedPeer *BzzAddr, saturationDepth int, c
 	return suggestedPeer, 0, false
 }
 
-// On inserts  the peer as a kademlia peer into the live peers
+// On inserts the peer as a kademlia peer into the live peers
 func (k *Kademlia) On(p *Peer) (uint8, bool) {
 	k.lock.Lock()
 	defer k.lock.Unlock()
@@ -552,6 +553,9 @@ func (k *Kademlia) string() string {
 	var rows []string
 
 	rows = append(rows, "=========================================================================")
+	if len(sv.GitCommit) > 0 {
+		rows = append(rows, fmt.Sprintf("commit hash: %s", sv.GitCommit))
+	}
 	rows = append(rows, fmt.Sprintf("%v KΛÐΞMLIΛ hive: queen's address: %x", time.Now().UTC().Format(time.UnixDate), k.BaseAddr()[:3]))
 	rows = append(rows, fmt.Sprintf("population: %d (%d), NeighbourhoodSize: %d, MinBinSize: %d, MaxBinSize: %d", k.conns.Size(), k.addrs.Size(), k.NeighbourhoodSize, k.MinBinSize, k.MaxBinSize))
 
