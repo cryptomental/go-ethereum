@@ -47,6 +47,8 @@ func TestDB_collectGarbageWorker_multipleBatches(t *testing.T) {
 // testDB_collectGarbageWorker is a helper test function to test
 // garbage collection runs by uploading and syncing a number of chunks.
 func testDB_collectGarbageWorker(t *testing.T) {
+	t.Helper()
+
 	chunkCount := 150
 
 	testHookCollectGarbageChan := make(chan int64)
@@ -116,15 +118,6 @@ func testDB_collectGarbageWorker(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
-
-	// cleanup: drain the last testHookCollectGarbageChan
-	// element before calling deferred functions not to block
-	// collectGarbageWorker loop, preventing the race in
-	// setting testHookCollectGarbage function
-	select {
-	case <-testHookCollectGarbageChan:
-	default:
-	}
 }
 
 // TestDB_collectGarbageWorker_withRequests is a helper test function
@@ -288,6 +281,7 @@ func TestDB_gcSize(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer db.Close()
 
 	t.Run("gc index size", newIndexGCSizeTest(db))
 
