@@ -13,7 +13,7 @@ import (
     "github.com/ethereum/go-ethereum/common"
     "github.com/ethereum/go-ethereum/core/state"
     "github.com/ethereum/go-ethereum/core/vm"
-    "github.com/ethereum/go-ethereum/ethdb"
+    "github.com/ethereum/go-ethereum/core/rawdb"
     "github.com/ethereum/go-ethereum/common/math"
     "github.com/ethereum/go-ethereum/params"
 )
@@ -316,7 +316,7 @@ func runVM(
     g_stack = nil
     g_stack_idx = 0
 
-    db := ethdb.NewMemDatabase()
+    db := rawdb.NewMemoryDatabase()
     sdb := state.NewDatabase(db)
     statedb, _ := state.New(common.Hash{}, sdb)
 
