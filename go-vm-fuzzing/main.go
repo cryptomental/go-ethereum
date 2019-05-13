@@ -377,9 +377,8 @@ func runVM(
         DisableStack: false,
         LogStack: logStack,
         DisableStorage: true,
-        //FullStorage: false,
         Limit: 0,
-        DisableMemory: false,
+        DisableMemory: true,
     }
     tracer := vm.NewStructLogger(logger_config)
     vm_config := vm.Config{Debug: true, Tracer: tracer}
