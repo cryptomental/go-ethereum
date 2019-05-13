@@ -63,8 +63,6 @@ var (
 
 	blockPrefetchExecuteTimer   = metrics.NewRegisteredTimer("chain/prefetch/executes", nil)
 	blockPrefetchInterruptMeter = metrics.NewRegisteredMeter("chain/prefetch/interrupts", nil)
-
-	ErrNoGenesis = errors.New("Genesis not found in chain")
 )
 
 const (
