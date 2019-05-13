@@ -10,6 +10,7 @@ import (
     "math/big"
     "fmt"
 
+    "github.com/pkg/profile"
     "github.com/ethereum/go-ethereum/common"
     "github.com/ethereum/go-ethereum/core/state"
     "github.com/ethereum/go-ethereum/core/vm"
@@ -18,6 +19,9 @@ import (
     "github.com/ethereum/go-ethereum/params"
 )
 var no_tracer bool;
+var p interface { Stop() }
+var prof *profile.Profile
+
 
 //export WriteSymcov
 func WriteSymcov(filename string) {
@@ -39,6 +43,15 @@ func SetInstrumentationType(t int) {
 //export DisableTracer
 func DisableTracer() {
     no_tracer = true;
+
+    prof = profile.Start()
+}
+
+//export ProfileStop 
+func ProfileStop() {
+    if prof != nil {
+      prof.Stop()
+    }
 }
 
 //export GoResetCoverage
@@ -308,6 +321,7 @@ func runVM(
 
     g_executingAddress = common.BytesToAddress(executingAddress)
 
+
     if abi_fuzzing.Enabled == true {
         abi_fuzzing.ResetCallDataLoads()
         g_calldatavars = nil
@@ -377,9 +391,8 @@ func runVM(
         DisableStack: false,
         LogStack: logStack,
         DisableStorage: true,
-        //FullStorage: false,
         Limit: 0,
-        DisableMemory: false,
+        DisableMemory: true,
     }
     tracer := vm.NewStructLogger(logger_config)
     vm_config := vm.Config{Debug: true, Tracer: tracer}
