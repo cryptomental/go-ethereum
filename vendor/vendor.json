@@ -135,10 +135,10 @@
 			"revisionTime": "2018-04-18T12:24:29Z"
 		},
 		{
-			"checksumSHA1": "GXqHzd0XkPLX/iulpOncaxbxzZo=",
+			"checksumSHA1": "+fiJGimxPPRSfi9sED4Lp6ytBeo=",
 			"path": "github.com/gballet/go-libpcsclite",
-			"revision": "312b5175032f98274685a4dd81935a92ad2412a5",
-			"revisionTime": "2019-04-03T18:15:18Z"
+			"revision": "2fd9b619dd3c5d74acbd975f997a6441984d74a7",
+			"revisionTime": "2019-05-28T10:50:17Z"
 		},
 		{
 			"checksumSHA1": "gxV/cPPLkByTdY8y172t7v4qcZA=",
@@ -941,10 +941,10 @@
 			"revisionTime": "2016-06-21T03:49:01Z"
 		},
 		{
-			"checksumSHA1": "vndxs5Tv09/8S+Dr2PBAiM557lI=",
+			"checksumSHA1": "h+m6mYCZIKnMQI24faKak5o19es=",
 			"path": "gopkg.in/olebedev/go-duktape.v3",
-			"revision": "abf0ba0be5d5d36b1f9266463cc320b9a5ab224e",
-			"revisionTime": "2018-03-02T12:15:09Z"
+			"revision": "ec84240a7772c7a122b1c58a13398210659f7c40",
+			"revisionTime": "2019-02-13T23:42:57Z"
 		},
 		{
 			"checksumSHA1": "4BwmmgQUhWtizsR2soXND0nqZ1I=",
