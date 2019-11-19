@@ -128,6 +128,7 @@ type AccountData struct {
 	address []byte
 	balance uint64
 	code    []byte
+	storage map[string]string
 }
 
 var g_accounts = make([]AccountData, 0)
@@ -280,9 +281,24 @@ func addAccount(address []byte, balance uint64, code []byte) {
 		address: address,
 		balance: balance,
 		code:    code,
+		storage: make(map[string]string),
 	}
 
 	g_accounts = append(g_accounts, account)
+}
+
+//export setStorage
+func setStorage(address []byte, k string, v string) {
+	// the copy below is needed as C++ side was overwriting the string
+	// when storage for mutliple accounts was enabled
+	kcopy := fmt.Sprintf("%s", k)
+	vcopy := fmt.Sprintf("%s", v)
+
+	for _, acc := range g_accounts {
+		if common.BytesToAddress(address) == common.BytesToAddress(acc.address) {
+			acc.storage[kcopy] = vcopy
+		}
+	}
 }
 
 //export runVM
@@ -339,6 +355,10 @@ func runVM(
 		addr := common.BytesToAddress(acc.address)
 		statedb.SetBalance(addr, new(big.Int).SetUint64(acc.balance))
 		statedb.SetCode(addr, acc.code)
+
+		for k, v := range acc.storage {
+			statedb.SetState(addr, common.HexToHash(k), common.HexToHash(v))
+		}
 	}
 
 	g_accounts = nil
