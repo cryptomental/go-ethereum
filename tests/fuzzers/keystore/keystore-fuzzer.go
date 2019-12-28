@@ -1,4 +1,4 @@
-// Copyright 2014 The go-ethereum Authors
+// Copyright 2019 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
 // The go-ethereum library is free software: you can redistribute it and/or modify
@@ -14,30 +14,24 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package core
+package keystore
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	"os"
+
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 )
 
-// NewTxsEvent is posted when a batch of transactions enter the transaction pool.
-type NewTxsEvent struct{ Txs []*types.Transaction }
+func Fuzz(input []byte) int {
+	ks := keystore.NewKeyStore("/tmp/ks", keystore.LightScryptN, keystore.LightScryptP)
 
-// NewMinedBlockEvent is posted when a block has been imported.
-type NewMinedBlockEvent struct{ Block *types.Block }
-
-// RemovedLogsEvent is posted when a reorg happens
-type RemovedLogsEvent struct{ Logs []*types.Log }
-
-type ChainEvent struct {
-	Block *types.Block
-	Hash  common.Hash
-	Logs  []*types.Log
+	a, err := ks.NewAccount(string(input))
+	if err != nil {
+		panic(err)
+	}
+	if err := ks.Unlock(a, string(input)); err != nil {
+		panic(err)
+	}
+	os.Remove(a.URL.Path)
+	return 0
 }
-
-type ChainSideEvent struct {
-	Block *types.Block
-}
-
-type ChainHeadEvent struct{ Block *types.Block }
